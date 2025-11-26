@@ -1,5 +1,5 @@
 import User from '../models/User';
-import bcrypt from 'bcryptjs/umd/types';
+import bcrypt from 'bcryptjs';
 
 // dados que se esperam para criar um novo usuário
 type CreateUserInput = {
