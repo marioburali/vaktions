@@ -58,6 +58,42 @@ class UserService {
     return newUser;
   }
 
+  async editUser(
+    userId: number,
+    data: Partial<CreateUserInput>
+  ): Promise<User> {
+    const user = await this.getUserById(userId);
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    if (data.email && data.email !== user.email) {
+      const existing = await this.getUserByEmail(data.email);
+      if (existing) {
+        throw new Error('Email already in use');
+      }
+    }
+
+    if (data.password) {
+      const saltRounds = 10;
+      data.password = await bcrypt.hash(data.password, saltRounds);
+    }
+
+    await user.update(data);
+    return user;
+  }
+
+  async deleteUser(userId: number): Promise<void> {
+    const user = await this.getUserById(userId);
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    await user.destroy();
+  }
+
   // Atualizar os dias de férias disponíveis de um usuário
   async updateAvailableVacationDays(userId: number, days: number) {
     const user = await this.getUserById(userId);
