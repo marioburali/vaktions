@@ -1,0 +1,22 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-lock.yaml
+dist/
+build/
+coverage/
+
+# TypeScript
+*.tsbuildinfo
+
+# Env / segredos
+.env
+.env.local
+.env.*.local
+
+# Mac / editor
+.DS_Store
+.vscode/
+.idea/
