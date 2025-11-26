@@ -36,12 +36,12 @@ module.exports = {
       },
       hiredAt: {
         type: DataTypes.DATE,
-        allowNull: true,
+        allowNull: false,
       },
       availableVacationDays: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        defaultValue: 30,
+        defaultValue: 0,
       },
       createdAt: {
         allowNull: false,

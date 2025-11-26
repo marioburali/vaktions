@@ -8,8 +8,8 @@ interface UserAttributes {
   email: string;
   password: string;
   role: 'admin' | 'user';
-  occupation?: string | null;
-  hiredAt: Date | null;
+  occupation?: string;
+  hiredAt: Date;
   availableVacationDays: number;
   createdAt?: Date;
   updatedAt?: Date;
@@ -17,10 +17,7 @@ interface UserAttributes {
 
 // O Optional indica quais campos não são obrigatórios na criação
 interface UserCreationAttributes
-  extends Optional<
-    UserAttributes,
-    'id' | 'occupation' | 'createdAt' | 'updatedAt' | 'hiredAt'
-  > {}
+  extends Optional<UserAttributes, 'id' | 'createdAt' | 'updatedAt'> {}
 
 class User
   extends Model<UserAttributes, UserCreationAttributes>
@@ -31,8 +28,8 @@ class User
   public email!: string;
   public password!: string;
   public role!: 'admin' | 'user';
-  public occupation!: string | null;
-  public hiredAt!: Date | null;
+  public occupation!: string;
+  public hiredAt!: Date;
   public availableVacationDays!: number;
   public readonly createdAt!: Date;
   public readonly updatedAt!: Date;
@@ -70,18 +67,18 @@ User.init(
 
     occupation: {
       type: DataTypes.STRING,
-      allowNull: true,
+      allowNull: false,
     },
 
     hiredAt: {
       type: DataTypes.DATE,
-      allowNull: true,
+      allowNull: false,
     },
 
     availableVacationDays: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      defaultValue: 30,
+      defaultValue: 0,
     },
 
     createdAt: {

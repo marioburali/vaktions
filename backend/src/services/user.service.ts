@@ -7,8 +7,8 @@ type CreateUserInput = {
   email: string;
   password: string;
   role: 'admin' | 'user';
-  occupation?: string;
-  hiredAt?: Date | null;
+  occupation: string;
+  hiredAt: Date;
   availableVacationDays?: number;
 };
 
@@ -40,9 +40,7 @@ class UserService {
 
     const role = data.role ?? 'user';
 
-    const availableVacationDays = data.availableVacationDays ?? 30;
-
-    const hiredAt = data.hiredAt ?? null;
+    const availableVacationDays = data.availableVacationDays ?? 0;
 
     // hashear a senha antes de salvar (omitted for brevity)
     const saltRounds = 10;
@@ -54,7 +52,7 @@ class UserService {
       password: hashedPassword,
       role,
       occupation: data.occupation,
-      hiredAt,
+      hiredAt: data.hiredAt,
       availableVacationDays,
     });
     return newUser;
