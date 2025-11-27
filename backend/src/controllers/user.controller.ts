@@ -80,5 +80,48 @@ class UserController {
       return res.status(500).json({ message: 'Internal server error' });
     }
   }
+
+  // editar um usuário
+  public async editUser(req: Request, res: Response): Promise<Response> {
+    const userId = parseInt(req.params.id, 10);
+    if (Number.isNaN(userId)) {
+      return res.status(400).json({ message: 'Invalid user id' });
+    }
+    const userData = req.body;
+    try {
+      const updatedUser: User = await userService.editUser(userId, userData);
+
+      // Remover senha da resposta
+      const plain = updatedUser.get({ plain: true });
+      const { password, ...safeUser } = plain;
+
+      return res.status(200).json({message: 'User updated', safeUser});
+    } catch (error: any) {
+      if (error.message === 'User not found') {
+        return res.status(404).json({ message: error.message });
+      }
+      if (error.message === 'Email already in use') {
+        return res.status(409).json({ message: error.message });
+      }
+      return res.status(500).json({ message: 'Internal server error' });
+    }
+  }
+
+  // deletar usuário
+  public async deleteUser(req: Request, res: Response): Promise<Response> {
+    const userId = parseInt(req.params.id, 10);
+    if (Number.isNaN(userId)) {
+      return res.status(400).json({ message: 'Invalid user id' });
+    }
+    try {
+      await userService.deleteUser(userId);
+      return res.status(200).json({ message: 'User deleted' });
+    } catch (error: any) {
+      if (error.message === 'User not found') {
+        return res.status(404).json({ message: error.message });
+      }
+      return res.status(500).json({ message: 'Internal server error' });
+    }
+  }
 }
 export default new UserController();

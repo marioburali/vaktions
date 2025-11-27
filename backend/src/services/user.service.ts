@@ -15,7 +15,9 @@ type CreateUserInput = {
 class UserService {
   // listar todos os usuários
   async getAllUsers(): Promise<User[]> {
-    const users = User.findAll();
+    const users = User.findAll({
+      order: [['id', 'ASC']],
+    });
     return users;
   }
 
