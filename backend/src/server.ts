@@ -2,6 +2,7 @@ import express from 'express';
 import * as dotenv from 'dotenv';
 import userRoutes from './routes/user.routes';
 import authRoutes from './routes/auth.routes';
+import { authMiddleware } from './middlewares/auth.middleware';
 
 dotenv.config();
 
@@ -11,7 +12,7 @@ app.use(express.json());
 
 app.use('/auth', authRoutes);
 
-app.use('/users', userRoutes);
+app.use('/users', authMiddleware, userRoutes);
 
 app.get('/', (req, res) => {
   res.send('API is running 🍾');
