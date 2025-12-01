@@ -17,109 +17,176 @@ class VacationService {
    * - não pode ter outro pedido pendente
    * - startDate <= endDate
    * - totalDays <= availableVacationDays do usuário
-   */
+   * - pelo menos 12 meses de trabalho
+   * - no máximo 3 períodos aprovados por ciclo de 12 meses
+   * - no máximo 30 dias aprovados por ciclo de 12 meses
+   * - pelo menos um período deve ter 14 dias ou mais
+   * - cada período deve ter no mínimo 5 dias
+   *    */
 
-  public async createVacationRequest(input: CreateVacationInput): Promise<Vacation> {
+  public async createVacationRequest(
+    input: CreateVacationInput
+  ): Promise<Vacation> {
     const { userId, startDate, endDate, notes } = input;
-  
+
     // 1) Garantir que o usuário existe
     const user = await User.findByPk(userId);
     if (!user) {
       throw new Error('User not found');
     }
-  
+
     // 2) Validar datas: startDate <= endDate
     const start = new Date(startDate);
     const end = new Date(endDate);
-  
+
     if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
       throw new Error('Invalid dates');
     }
-  
+
     if (start > end) {
       throw new Error('startDate must be before or equal to endDate');
     }
-  
+
     // 3) Regra: só pode tirar férias depois de 12 meses de trabalho
-    const hiredAt: Date | null = user.hiredAt ?? null;
-  
+    const hiredAt: Date | null = (user as any).hiredAt ?? null;
+
     if (hiredAt) {
       const oneYearAfterHire = new Date(hiredAt);
       oneYearAfterHire.setFullYear(oneYearAfterHire.getFullYear() + 1);
-  
+
       if (start < oneYearAfterHire) {
-        throw new Error('Employee must have at least 12 months of work to request vacations');
+        throw new Error(
+          'Employee must have at least 12 months of work to request vacations'
+        );
       }
     }
-  
-    // 4) Calcular quantidade de dias (férias são inclusivas: conta início e fim)
+
+    // 4) Calcular quantidade de dias (contando início e fim)
     const diffMs = end.getTime() - start.getTime();
     const totalDays = Math.floor(diffMs / (1000 * 60 * 60 * 24)) + 1;
-  
-    if (totalDays <= 5) {
-      throw new Error('Vacation period must be at least 5 day');
+
+    // Regra: cada solicitação deve ter pelo menos 5 dias
+    if (totalDays < 5) {
+      throw new Error('Vacation period must be at least 5 days');
     }
-  
-    // 5) Verificar se já existe pedido pendente
-    const today = new Date();
-    const activeRequest = await Vacation.findOne({
+
+    // 5) Regra: não pode ter outra solicitação PENDENTE
+    const pendingRequest = await Vacation.findOne({
       where: {
         userId,
-        status: {
-          [Op.in]: ['pending'],
+        status: 'pending',
+      },
+    });
+
+    if (pendingRequest) {
+      throw new Error('User already has a pending vacation request');
+    }
+
+    // 6) Definir ciclo (12 meses a partir da data de admissão) para aplicar regras por ciclo
+    if (!hiredAt) {
+      throw new Error(
+        'User hire date (hiredAt) is required to calculate vacation cycles'
+      );
+    }
+
+    const diffFromHireMs = start.getTime() - hiredAt.getTime();
+    const diffFromHireDays = Math.floor(diffFromHireMs / (1000 * 60 * 60 * 24));
+    const cycleIndex = Math.floor(diffFromHireDays / 365);
+
+    const cycleStart = new Date(hiredAt);
+    cycleStart.setFullYear(cycleStart.getFullYear() + cycleIndex);
+
+    const cycleEnd = new Date(cycleStart);
+    cycleEnd.setFullYear(cycleEnd.getFullYear() + 1);
+
+    // 7) Buscar períodos APROVADOS dentro desse ciclo
+    const vacationsInCycle = await Vacation.findAll({
+      where: {
+        userId,
+        status: 'approved',
+        startDate: {
+          [Op.gte]: cycleStart,
         },
         endDate: {
-          [Op.gte]: today,
+          [Op.lte]: cycleEnd,
         },
       },
     });
-  
-    // 6) Regra: no máximo 3 períodos de férias por ciclo
-    // Aqui vamos considerar um "ciclo" de 12 meses a partir da data de admissão.
-    // Descobrimos em qual ciclo esse pedido cai, e contamos quantos períodos já existem nele.
-    if (hiredAt) {
-      // diferença em ms entre o início das férias e a data de admissão
-      const diffFromHireMs = start.getTime() - hiredAt.getTime();
-      const diffFromHireDays = Math.floor(diffFromHireMs / (1000 * 60 * 60 * 24));
-  
-      // cada ciclo de 12 meses ~ 365 dias (aproximação simples)
-      const cycleIndex = Math.floor(diffFromHireDays / 365);
-  
-      const cycleStart = new Date(hiredAt);
-      cycleStart.setFullYear(cycleStart.getFullYear() + cycleIndex);
-  
-      const cycleEnd = new Date(cycleStart);
-      cycleEnd.setFullYear(cycleEnd.getFullYear() + 1);
-  
-      // busca períodos APROVADOS dentro desse ciclo
-      const vacationsInCycle = await Vacation.findAll({
-        where: {
-          userId,
-          status: 'approved',
-          startDate: {
-            [Op.gte]: cycleStart,
-          },
-          endDate: {
-            [Op.lte]: cycleEnd,
-          },
-        },
-      });
-  
-      // +1 porque estamos considerando também o período que está sendo criado agora
-      if (vacationsInCycle.length + 1 > 3) {
-        throw new Error('Employee cannot have more than 3 vacation periods in the same cycle');
+
+    const periodsCount = vacationsInCycle.length;
+    const totalApprovedDays = vacationsInCycle.reduce(
+      (sum, v) => sum + v.totalDays,
+      0
+    );
+
+    // 8) No máximo 3 períodos por ciclo
+    if (periodsCount >= 3) {
+      throw new Error(
+        'Employee cannot have more than 3 vacation periods in the same cycle'
+      );
+    }
+
+    // 9) Soma total dos períodos não pode passar de 30 dias
+    const newTotalDaysInCycle = totalApprovedDays + totalDays;
+    if (newTotalDaysInCycle > 30) {
+      throw new Error('Total vacation days in the cycle cannot exceed 30 days');
+    }
+
+    // 10) Regras de fracionamento:
+    // - Pelo menos um período precisa ter 14 dias ou mais
+    // - Se este for o 3º período, ele deve completar os 30 dias e continuar respeitando:
+    //   - cada período >= 5 dias
+    //   - pelo menos um >= 14 dias
+
+    // lista de dias dos períodos aprovados
+    const approvedPeriodsDays = vacationsInCycle.map((v) => v.totalDays);
+
+    if (periodsCount === 2) {
+      // este pedido será o 3º período
+      // a soma PRECISA fechar exatamente 30 dias
+      if (newTotalDaysInCycle !== 30) {
+        throw new Error(
+          'On the third vacation period, the total days in the cycle must complete exactly 30 days'
+        );
+      }
+
+      // garantir que em ALGUM dos 3 períodos >= 14 dias
+      const maxDaysWithNew = Math.max(...approvedPeriodsDays, totalDays);
+      if (maxDaysWithNew < 14) {
+        throw new Error(
+          'At least one vacation period in the cycle must be 14 days or more'
+        );
+      }
+    } else {
+      // se ainda estamos no 1º ou 2º período, não forçamos 14 dias já,
+      // mas garante que ainda seja matematicamente possível ter um período >= 14 depois
+
+      const maxExisting = approvedPeriodsDays.length
+        ? Math.max(...approvedPeriodsDays)
+        : 0;
+
+      const remainingDays = 30 - newTotalDaysInCycle;
+
+      const hasFourteenAlready = maxExisting >= 14 || totalDays >= 14;
+
+      if (!hasFourteenAlready && remainingDays < 14 && periodsCount + 1 < 3) {
+        // ainda não temos período >= 14,
+        // ainda não é o 3º período,
+        // e já vai sobrar menos de 14 dias pro futuro
+        throw new Error(
+          'With this request, it will not be possible to have a 14-day vacation period in this cycle'
+        );
       }
     }
-  
-    // 7) Validar saldo de férias do usuário (regra dos 30 dias por ciclo fica
-    // representada no campo availableVacationDays)
-    const availableVacationDays: number = user.availableVacationDays ?? 0;
-  
+
+    // 11) Verificar saldo de férias do usuário
+    const availableVacationDays: number =
+      (user as any).availableVacationDays ?? 0;
     if (totalDays > availableVacationDays) {
       throw new Error('Requested days exceed available vacation days');
     }
-  
-    // 8) Criar o pedido (status: pending)
+
+    // 12) Criar o pedido (status: pending)
     const vacation = await Vacation.create({
       userId,
       startDate,
@@ -129,11 +196,9 @@ class VacationService {
       requestedAt: new Date(),
       notes: notes ?? null,
     });
-  
-    return vacation;
-  } 
-    
 
+    return vacation;
+  }
 
   // Lista todas as férias de um usuário (independente do status)
   public async getVacationsByUser(userId: number): Promise<Vacation[]> {
@@ -144,7 +209,6 @@ class VacationService {
 
     return vacations;
   }
-
 
   //  * Lista todas as férias do sistema (pra admin, por exemplo)
   public async getAllVacations(): Promise<Vacation[]> {
@@ -162,7 +226,10 @@ class VacationService {
    * - atualiza status para approved
    * - desconta do availableVacationDays
    */
-  public async approveVacation(vacationId: number, adminId: number): Promise<Vacation> {
+  public async approveVacation(
+    vacationId: number,
+    adminId: number
+  ): Promise<Vacation> {
     const vacation = await Vacation.findByPk(vacationId);
 
     if (!vacation) {
