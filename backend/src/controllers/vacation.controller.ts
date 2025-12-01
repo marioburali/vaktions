@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import vacationService, {
   CreateVacationInput,
 } from '../services/vacation.service';
+import { mapError } from '../utils/errorMapper';
 
 // Tipagem da request autenticada, assumindo que o authMiddleware preenche req.user
 interface AuthUser {
@@ -43,7 +44,7 @@ class VacationController {
 
       return res.status(201).json(plain);
     } catch (error: any) {
-      const { status, message } = this.mapError(error);
+      const { status, message } = mapError(error);
       return res.status(status).json({ message });
     }
   }
@@ -67,7 +68,7 @@ class VacationController {
 
       return res.status(200).json(plain);
     } catch (error: any) {
-      const { status, message } = this.mapError(error);
+      const { status, message } = mapError(error);
       return res.status(status).json({ message });
     }
   }
@@ -94,7 +95,7 @@ class VacationController {
 
       return res.status(200).json(plain);
     } catch (error: any) {
-      const { status, message } = this.mapError(error);
+      const { status, message } = mapError(error);
       return res.status(status).json({ message });
     }
   }
@@ -131,7 +132,7 @@ class VacationController {
 
       return res.status(200).json(plain);
     } catch (error: any) {
-      const { status, message } = this.mapError(error);
+      const { status, message } = mapError(error);
       return res.status(status).json({ message });
     }
   }
@@ -171,50 +172,9 @@ class VacationController {
 
       return res.status(200).json(plain);
     } catch (error: any) {
-      const { status, message } = this.mapError(error);
+      const { status, message } = mapError(error);
       return res.status(status).json({ message });
     }
-  }
-
-  /**
-   * Mapeia mensagens de erro de regra de negócio para status HTTP.
-   * Isso deixa as respostas mais semânticas e fáceis de debugar.
-   */
-  private mapError(error: any): { status: number; message: string } {
-    const defaultMessage =
-      error instanceof Error ? error.message : 'Internal server error';
-
-    if (!(error instanceof Error)) {
-      return { status: 500, message: defaultMessage };
-    }
-
-    const msg = error.message;
-
-    // 404 - recursos não encontrados
-    if (msg === 'User not found' || msg === 'Vacation not found') {
-      return { status: 404, message: msg };
-    }
-
-    // 400 - erros de validação / regra de negócio
-    const badRequestErrors = [
-      'Invalid dates',
-      'startDate must be before or equal to endDate',
-      'Employee must have at least 12 months of work to request vacations',
-      'Vacation period must be at least 1 day',
-      'User already has an active vacation request',
-      'Requested days exceed available vacation days',
-      'User does not have enough vacation days',
-      'Only pending vacations can be approved',
-      'Only pending vacations can be rejected',
-      'Employee cannot have more than 3 vacation periods in the same cycle',
-    ];
-
-    if (badRequestErrors.includes(msg)) {
-      return { status: 400, message: msg };
-    }
-
-    // fallback: erro interno
-    return { status: 500, message: defaultMessage };
   }
 }
 
