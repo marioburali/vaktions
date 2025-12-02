@@ -4,7 +4,6 @@ export function mapError(error: unknown): {
   status: number;
   message: string;
 } {
-  // Se não for Error normal, tratamos como erro interno
   if (!(error instanceof Error)) {
     return {
       status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
@@ -26,6 +25,14 @@ export function mapError(error: unknown): {
   if (msg === 'Email already in use') {
     return {
       status: HTTP_STATUS.CONFLICT,
+      message: msg,
+    };
+  }
+
+  // 401 – credenciais inválidas
+  if (msg === 'Invalid credentials') {
+    return {
+      status: HTTP_STATUS.UNAUTHORIZED, // 401
       message: msg,
     };
   }
