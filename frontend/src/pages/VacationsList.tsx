@@ -14,12 +14,17 @@ import {
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { getAllVacations } from '../services/vacations';
+import Header from '../components/Header';
 
 export default function VacationList() {
   const [vacations, setVacations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+
+  const [darkMode, setDarkMode] = useState<boolean>(() => {
+    return localStorage.getItem('theme') === 'dark';
+  });
 
   useEffect(() => {
     loadData();
@@ -37,6 +42,14 @@ export default function VacationList() {
     }
   }
 
+  const handleToggleDarkMode = () => {
+    setDarkMode((prev) => {
+      const next = !prev;
+      localStorage.setItem('theme', next ? 'dark' : 'light');
+      return next;
+    });
+  };
+
   const statusColor = (status: string) => {
     switch (status) {
       case 'pending':
@@ -50,100 +63,118 @@ export default function VacationList() {
     }
   };
 
+  const bgColor = darkMode ? '#020617' : '#f3f4f6';
+  const tableBg = darkMode ? '#0b1120' : '#ffffff';
+  const textMain = darkMode ? '#e5e7eb' : '#0f172a';
+  const textSecondary = darkMode ? '#cbd5f5' : '#4b5563';
+  const borderColor = darkMode ? 'rgba(148,163,184,0.2)' : '#e5e7eb';
+  const rowHoverBg = darkMode
+    ? 'rgba(148,163,184,0.1)'
+    : 'rgba(148,163,184,0.08)';
+
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        backgroundColor: '#020617',
-        p: 4,
-        color: '#e5e7eb',
-      }}
-    >
-      <Typography variant="h5" fontWeight={600} mb={3}>
-        Gerenciar solicitações de férias
-      </Typography>
+    <Box sx={{ minHeight: '100vh', backgroundColor: bgColor }}>
+      <Header darkMode={darkMode} onToggleDarkMode={handleToggleDarkMode} />
 
-      {loading && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 6 }}>
-          <CircularProgress color="inherit" />
-        </Box>
-      )}
-
-      {!loading && error && (
-        <Typography color="error" mt={2}>
-          {error}
-        </Typography>
-      )}
-
-      {!loading && !error && vacations.length === 0 && (
-        <Typography mt={2}>Nenhuma solicitação encontrada.</Typography>
-      )}
-
-      {!loading && !error && vacations.length > 0 && (
-        <Paper
-          sx={{
-            backgroundColor: '#0b1120',
-            borderRadius: 3,
-            overflow: 'hidden',
-            border: '1px solid rgba(148,163,184,0.2)',
-          }}
+      <Box sx={{ p: 4 }}>
+        <Typography
+          variant="h5"
+          fontWeight={600}
+          mb={3}
+          sx={{ color: textMain }}
         >
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell sx={{ color: '#e2e8f0' }}>Colaborador</TableCell>
-                <TableCell sx={{ color: '#e2e8f0' }}>Período</TableCell>
-                <TableCell sx={{ color: '#e2e8f0' }}>Dias</TableCell>
-                <TableCell sx={{ color: '#e2e8f0' }}>Status</TableCell>
-                <TableCell sx={{ color: '#e2e8f0' }}></TableCell>
-              </TableRow>
-            </TableHead>
+          Gerenciar solicitações de férias
+        </Typography>
 
-            <TableBody>
-              {vacations.map((vac: any) => (
-                <TableRow
-                  key={vac.id}
-                  hover
-                  sx={{
-                    '&:hover': {
-                      backgroundColor: 'rgba(148,163,184,0.1)',
-                      cursor: 'pointer',
-                    },
-                  }}
-                >
-                  <TableCell sx={{ color: '#cbd5e1' }}>
-                    {vac.user?.name}
+        {loading && (
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 6 }}>
+            <CircularProgress color="inherit" />
+          </Box>
+        )}
+
+        {!loading && error && (
+          <Typography color="error" mt={2}>
+            {error}
+          </Typography>
+        )}
+
+        {!loading && !error && vacations.length === 0 && (
+          <Typography mt={2} sx={{ color: textSecondary }}>
+            Nenhuma solicitação encontrada.
+          </Typography>
+        )}
+
+        {!loading && !error && vacations.length > 0 && (
+          <Paper
+            sx={{
+              backgroundColor: tableBg,
+              borderRadius: 3,
+              overflow: 'hidden',
+              border: `1px solid ${borderColor}`,
+            }}
+          >
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={{ color: textSecondary }}>
+                    Colaborador
                   </TableCell>
-                  <TableCell sx={{ color: '#cbd5e1' }}>
-                    {vac.startDate} — {vac.endDate}
-                  </TableCell>
-                  <TableCell sx={{ color: '#cbd5e1' }}>
-                    {vac.totalDays}
-                  </TableCell>
-                  <TableCell>
-                    <Chip
-                      label={vac.status}
-                      color={statusColor(vac.status)}
-                      size="small"
-                      sx={{ textTransform: 'capitalize' }}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      sx={{ borderColor: '#64748b', color: '#cbd5e1' }}
-                      onClick={() => navigate(`/admin/requests/${vac.id}`)}
-                    >
-                      Ver detalhes
-                    </Button>
-                  </TableCell>
+                  <TableCell sx={{ color: textSecondary }}>Período</TableCell>
+                  <TableCell sx={{ color: textSecondary }}>Dias</TableCell>
+                  <TableCell sx={{ color: textSecondary }}>Status</TableCell>
+                  <TableCell sx={{ color: textSecondary }}></TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </Paper>
-      )}
+              </TableHead>
+
+              <TableBody>
+                {vacations.map((vac: any) => (
+                  <TableRow
+                    key={vac.id}
+                    hover
+                    sx={{
+                      '&:hover': {
+                        backgroundColor: rowHoverBg,
+                        cursor: 'pointer',
+                      },
+                    }}
+                  >
+                    <TableCell sx={{ color: textSecondary }}>
+                      {vac.user?.name ?? `Usuário #${vac.userId}`}
+                    </TableCell>
+                    <TableCell sx={{ color: textSecondary }}>
+                      {vac.startDate} — {vac.endDate}
+                    </TableCell>
+                    <TableCell sx={{ color: textSecondary }}>
+                      {vac.totalDays}
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        label={vac.status}
+                        color={statusColor(vac.status)}
+                        size="small"
+                        sx={{ textTransform: 'capitalize' }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        sx={{
+                          borderColor: borderColor,
+                          color: textSecondary,
+                        }}
+                        onClick={() => navigate(`/admin/requests/${vac.id}`)}
+                      >
+                        Ver detalhes
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Paper>
+        )}
+      </Box>
     </Box>
   );
 }
