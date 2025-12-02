@@ -200,7 +200,7 @@ class VacationService {
     return vacation;
   }
 
-  // Lista todas as férias de um usuário (independente do status)
+  // Lista todas as férias de um usuário 
   public async getVacationsByUser(userId: number): Promise<Vacation[]> {
     const vacations = await Vacation.findAll({
       where: { userId },
@@ -210,7 +210,7 @@ class VacationService {
     return vacations;
   }
 
-  //  * Lista todas as férias do sistema (pra admin, por exemplo)
+  //  * Lista todas as férias do sistema (pra admin)
   public async getAllVacations(): Promise<Vacation[]> {
     const vacations = await Vacation.findAll({
       include: [

@@ -22,15 +22,17 @@ import {
 
 import Header from '../components/Header';
 import RejectModal from '../components/RejectModal';
+import ErrorModal from '../components/ErrorModal';
 
 export default function VacationList() {
   const [vacations, setVacations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
 
   const [rejectOpen, setRejectOpen] = useState(false);
   const [vacationToReject, setVacationToReject] = useState<any | null>(null);
   const [submittingId, setSubmittingId] = useState<number | null>(null);
+
+  const [errorModal, setErrorModal] = useState<string | null>(null);
 
   const navigate = useNavigate();
 
@@ -45,11 +47,10 @@ export default function VacationList() {
   async function loadData() {
     try {
       setLoading(true);
-      setError('');
       const data = await getAllVacations();
       setVacations(data);
     } catch (err: any) {
-      setError(err.message || 'Erro ao carregar solicitações');
+      setErrorModal(err.message || 'Erro ao carregar solicitações');
     } finally {
       setLoading(false);
     }
@@ -71,8 +72,6 @@ export default function VacationList() {
         return 'success';
       case 'rejected':
         return 'error';
-      case 'completed':
-        return 'default';
       default:
         return 'default';
     }
@@ -90,11 +89,10 @@ export default function VacationList() {
   const handleApprove = async (vac: any) => {
     try {
       setSubmittingId(vac.id);
-      setError('');
       await approveVacation(vac.id);
       await loadData();
     } catch (err: any) {
-      setError(err.message || 'Erro ao aprovar solicitação');
+      setErrorModal(err.message || 'Erro ao aprovar solicitação');
     } finally {
       setSubmittingId(null);
     }
@@ -115,11 +113,11 @@ export default function VacationList() {
 
     try {
       setSubmittingId(vacationToReject.id);
-      await rejectVacation(vacationToReject.id, notes.trim() || undefined);
+      await rejectVacation(vacationToReject.id, notes.trim());
       await loadData();
       closeRejectModal();
     } catch (err: any) {
-      setError(err.message || 'Erro ao rejeitar solicitação');
+      setErrorModal(err.message || 'Erro ao rejeitar solicitação');
     } finally {
       setSubmittingId(null);
     }
@@ -139,25 +137,19 @@ export default function VacationList() {
           Gerenciar solicitações de férias
         </Typography>
 
-        {error && !loading && (
-          <Typography color="error" mb={2}>
-            {error}
-          </Typography>
-        )}
-
         {loading && (
           <Box sx={{ display: 'flex', justifyContent: 'center', mt: 6 }}>
             <CircularProgress color="inherit" />
           </Box>
         )}
 
-        {!loading && !error && vacations.length === 0 && (
+        {!loading && vacations.length === 0 && (
           <Typography mt={2} sx={{ color: textSecondary }}>
             Nenhuma solicitação encontrada.
           </Typography>
         )}
 
-        {!loading && !error && vacations.length > 0 && (
+        {!loading && vacations.length > 0 && (
           <Paper
             sx={{
               backgroundColor: tableBg,
@@ -191,9 +183,7 @@ export default function VacationList() {
                       key={vac.id}
                       hover
                       sx={{
-                        '&:hover': {
-                          backgroundColor: rowHoverBg,
-                        },
+                        '&:hover': { backgroundColor: rowHoverBg },
                       }}
                     >
                       <TableCell sx={{ color: textSecondary }}>
@@ -222,11 +212,7 @@ export default function VacationList() {
                       </TableCell>
 
                       <TableCell
-                        sx={{
-                          display: 'flex',
-                          gap: 1,
-                          flexWrap: 'wrap',
-                        }}
+                        sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}
                       >
                         <Button
                           variant="text"
@@ -241,10 +227,7 @@ export default function VacationList() {
                           variant="outlined"
                           size="small"
                           disabled={isSubmitting}
-                          sx={{
-                            borderColor: borderColor,
-                            color: textSecondary,
-                          }}
+                          sx={{ borderColor, color: textSecondary }}
                           onClick={() => handleApprove(vac)}
                         >
                           Aprovar
@@ -254,10 +237,7 @@ export default function VacationList() {
                           variant="outlined"
                           size="small"
                           disabled={isSubmitting}
-                          sx={{
-                            borderColor: borderColor,
-                            color: textSecondary,
-                          }}
+                          sx={{ borderColor, color: textSecondary }}
                           onClick={() => openRejectModal(vac)}
                         >
                           Rejeitar
@@ -272,13 +252,18 @@ export default function VacationList() {
         )}
       </Box>
 
-      {/* modal */}
       <RejectModal
         open={rejectOpen}
         onClose={closeRejectModal}
         onConfirm={handleConfirmReject}
         loading={submittingId !== null}
         vacation={vacationToReject}
+      />
+
+      <ErrorModal
+        open={!!errorModal}
+        message={errorModal || ''}
+        onClose={() => setErrorModal(null)}
       />
     </Box>
   );
