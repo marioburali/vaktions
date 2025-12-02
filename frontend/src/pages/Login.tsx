@@ -95,15 +95,15 @@ export default function LoginPage() {
               backdropFilter: 'blur(22px)',
               WebkitBackdropFilter: 'blur(22px)',
               border: '1px solid rgba(255,255,255,0.15)',
-              borderRadius: '0px', // mantém alinhado com o layout, pode ajustar
+              borderRadius: '0px',
               boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
             }}
           >
             <Typography variant="h5" fontWeight={600} mb={1}>
-              Bem-vindo de volta
+              Bem-vindo!
             </Typography>
             <Typography variant="body2" color="text.secondary" mb={3}>
-              Acesse sua conta para gerenciar solicitações de reembolso.
+              Acesse sua conta.
             </Typography>
 
             {error && (

@@ -116,11 +116,10 @@ export default function Home() {
         >
           <Box>
             <Typography variant="h5" fontWeight={600}>
-              Olá, {user?.name || 'colaborador(a)'}
+              Olá, {user?.name || 'colaborador(a)'}!
             </Typography>
             <Typography variant="body2" sx={{ color: textColor, mt: 0.5 }}>
-              Aqui você gerencia solicitações de férias e dados dos
-              colaboradores.
+              Seja bem vindo ao melhor sistema de gerenciamento de férias do mundo.
             </Typography>
             {isAdmin && (
               <Typography variant="caption" sx={{ color: textColor, mt: 0.5 }}>

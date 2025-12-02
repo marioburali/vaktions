@@ -54,7 +54,6 @@ export default function UserModal({
         hiredAt: user.hiredAt ? user.hiredAt.split('T')[0] : '',
       });
     } else {
-      // create sempre começa limpo
       setForm(EMPTY_FORM);
     }
   }, [open, mode, user]);
