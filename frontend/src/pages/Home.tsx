@@ -69,7 +69,7 @@ export default function Home() {
   const isAdmin = user?.role === 'admin';
 
   const visibleCards = cards.filter((card) =>
-    card.onlyAdmin ? isAdmin : true,
+    card.onlyAdmin ? isAdmin : true
   );
 
   const handleCardClick = (path: string) => {
@@ -119,13 +119,11 @@ export default function Home() {
               Olá, {user?.name || 'colaborador(a)'}
             </Typography>
             <Typography variant="body2" sx={{ color: textColor, mt: 0.5 }}>
-              Aqui você gerencia solicitações de férias e dados dos colaboradores.
+              Aqui você gerencia solicitações de férias e dados dos
+              colaboradores.
             </Typography>
             {isAdmin && (
-              <Typography
-                variant="caption"
-                sx={{ color: textColor, mt: 0.5 }}
-              >
+              <Typography variant="caption" sx={{ color: textColor, mt: 0.5 }}>
                 Você está logado como <strong>admin</strong>.
               </Typography>
             )}

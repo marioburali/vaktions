@@ -34,7 +34,12 @@ export default function DeleteUserModal({
       </DialogContent>
 
       <DialogActions>
-        <Button onClick={onClose} disabled={loading}>
+        <Button
+          onClick={onClose}
+          disabled={loading}
+          variant="outlined"
+          color="error"
+        >
           Cancelar
         </Button>
 

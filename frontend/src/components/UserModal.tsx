@@ -19,6 +19,15 @@ type Props = {
   user?: any;
 };
 
+const EMPTY_FORM = {
+  name: '',
+  email: '',
+  password: '',
+  role: 'user',
+  occupation: '',
+  hiredAt: '',
+};
+
 export default function UserModal({
   open,
   onClose,
@@ -27,42 +36,52 @@ export default function UserModal({
   mode,
   user,
 }: Props) {
-  const [form, setForm] = useState({
-    name: '',
-    email: '',
-    password: '',
-    role: 'user',
-    occupation: '',
-    hiredAt: '',
-  });
+  const [form, setForm] = useState(EMPTY_FORM);
 
   useEffect(() => {
+    if (!open) {
+      setForm(EMPTY_FORM);
+      return;
+    }
+
     if (mode === 'edit' && user) {
       setForm({
-        name: user.name,
-        email: user.email,
+        name: user.name || '',
+        email: user.email || '',
         password: '',
-        role: user.role,
-        occupation: user.occupation,
-        hiredAt: user.hiredAt.split('T')[0],
+        role: user.role || 'user',
+        occupation: user.occupation || '',
+        hiredAt: user.hiredAt ? user.hiredAt.split('T')[0] : '',
       });
     } else {
-      setForm({
-        name: '',
-        email: '',
-        password: '',
-        role: 'user',
-        occupation: '',
-        hiredAt: '',
-      });
+      // create sempre começa limpo
+      setForm(EMPTY_FORM);
     }
-  }, [mode, user]);
+  }, [open, mode, user]);
 
   const handleChange = (field: string, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
   const isPasswordRequired = mode === 'create';
+
+  // validação simples de e-mail
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const emailInvalid =
+    form.email.trim().length > 0 && !emailRegex.test(form.email.trim());
+
+  const canSubmit =
+    form.name.trim().length > 0 &&
+    form.email.trim().length > 0 &&
+    !emailInvalid &&
+    form.occupation.trim().length > 0 &&
+    form.hiredAt.trim().length > 0 &&
+    (!isPasswordRequired || form.password.trim().length > 0);
+
+  const handleConfirmClick = () => {
+    if (!canSubmit || loading) return;
+    onConfirm(form);
+  };
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
@@ -77,13 +96,18 @@ export default function UserModal({
             fullWidth
             value={form.name}
             onChange={(e) => handleChange('name', e.target.value)}
+            autoComplete="off"
           />
 
           <TextField
             label="Email"
+            type="email"
             fullWidth
             value={form.email}
             onChange={(e) => handleChange('email', e.target.value)}
+            autoComplete="off"
+            error={emailInvalid}
+            helperText={emailInvalid ? 'Informe um email válido.' : ''}
           />
 
           <TextField
@@ -94,6 +118,7 @@ export default function UserModal({
             required={isPasswordRequired}
             onChange={(e) => handleChange('password', e.target.value)}
             placeholder={mode === 'edit' ? 'Preencha caso queira trocar' : ''}
+            autoComplete="new-password"
           />
 
           <TextField
@@ -112,6 +137,7 @@ export default function UserModal({
             fullWidth
             value={form.occupation}
             onChange={(e) => handleChange('occupation', e.target.value)}
+            autoComplete="off"
           />
 
           <TextField
@@ -126,14 +152,19 @@ export default function UserModal({
       </DialogContent>
 
       <DialogActions>
-        <Button onClick={onClose} disabled={loading}>
+        <Button
+          onClick={onClose}
+          disabled={loading}
+          variant="outlined"
+          color="error"
+        >
           Cancelar
         </Button>
 
         <Button
           variant="contained"
-          disabled={loading}
-          onClick={() => onConfirm(form)}
+          disabled={loading || !canSubmit}
+          onClick={handleConfirmClick}
         >
           {mode === 'create' ? 'Criar' : 'Salvar alterações'}
         </Button>

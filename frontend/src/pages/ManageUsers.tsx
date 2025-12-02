@@ -23,7 +23,12 @@ import Header from '../components/Header';
 import ErrorModal from '../components/ErrorModal';
 import UserModal from '../components/UserModal';
 import DeleteUserModal from '../components/DeleteUserModal';
-import { getAllUsers, createUser, updateUser, deleteUser } from '../services/users';
+import {
+  getAllUsers,
+  createUser,
+  updateUser,
+  deleteUser,
+} from '../services/users';
 import { formatDate } from '../utils/formatDate';
 
 type Role = 'admin' | 'user';
@@ -212,11 +217,7 @@ export default function ManageUsers() {
           }}
         >
           <Box>
-            <Typography
-              variant="h5"
-              fontWeight={600}
-              sx={{ color: textMain }}
-            >
+            <Typography variant="h5" fontWeight={600} sx={{ color: textMain }}>
               Gerenciar usuários
             </Typography>
             <Typography variant="body2" sx={{ color: textSecondary }}>
@@ -300,7 +301,7 @@ export default function ManageUsers() {
                       <Chip
                         label={user.role}
                         size="small"
-                        color={user.role === 'admin' ? 'primary' : 'default'}
+                        color={user.role === 'admin' ? 'primary' : 'success'}
                         sx={{ textTransform: 'capitalize' }}
                       />
                     </TableCell>
@@ -311,7 +312,10 @@ export default function ManageUsers() {
                             size="small"
                             onClick={() => handleOpenEdit(user)}
                           >
-                            <EditIcon fontSize="small" />
+                            <EditIcon
+                              fontSize="small"
+                              sx={{ color: textSecondary }}
+                            />
                           </IconButton>
                         </Tooltip>
 

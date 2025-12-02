@@ -7,6 +7,7 @@ import VacationList from './pages/VacationsList';
 import VacationDetails from './pages/VacationDetails';
 import MyRequests from './pages/MyRequests';
 import ManageUsers from './pages/ManageUsers';
+import Profile from './pages/Profile';
 
 export default function App() {
   return (
@@ -49,6 +50,22 @@ export default function App() {
         element={
           <PrivateRoute>
             <ManageUsers />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="me"
+        element={
+          <PrivateRoute>
+            <Profile />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="*"
+        element={
+          <PrivateRoute>
+            <Home />
           </PrivateRoute>
         }
       />
