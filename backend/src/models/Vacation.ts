@@ -1,5 +1,6 @@
 import { Model, DataTypes, Optional } from 'sequelize';
 import sequelize from '../database/connection';
+import User from './User';
 
 // Atributos
 export interface VacationAttributes {
@@ -107,5 +108,10 @@ Vacation.init(
     timestamps: true,
   }
 );
+
+Vacation.belongsTo(User, {
+  foreignKey: 'userId',
+  as: 'user',
+});
 
 export default Vacation;

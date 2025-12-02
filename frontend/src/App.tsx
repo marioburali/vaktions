@@ -3,6 +3,7 @@ import LoginPage from './pages/Login';
 import Home from './pages/Home';
 import PrivateRoute from './components/PrivateRoute';
 import './App.css';
+import VacationList from './pages/VacationsList';
 
 export default function App() {
   return (
@@ -13,6 +14,14 @@ export default function App() {
         element={
           <PrivateRoute>
             <Home />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/admin/requests"
+        element={
+          <PrivateRoute>
+            <VacationList />
           </PrivateRoute>
         }
       />

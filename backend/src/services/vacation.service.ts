@@ -213,9 +213,16 @@ class VacationService {
   //  * Lista todas as férias do sistema (pra admin, por exemplo)
   public async getAllVacations(): Promise<Vacation[]> {
     const vacations = await Vacation.findAll({
+      include: [
+        {
+          model: User,
+          as: 'user',
+          attributes: ['id', 'name', 'email', 'role'],
+        },
+      ],
       order: [['requestedAt', 'DESC']],
     });
-
+  
     return vacations;
   }
 
