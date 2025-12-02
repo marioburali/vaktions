@@ -20,8 +20,10 @@ import {
   Logout,
   DashboardOutlined,
   BeachAccessOutlined,
+  GroupOutlined,
 } from '@mui/icons-material';
 import { useLocation, useNavigate } from 'react-router-dom';
+import CalendarMonthOutlined from '@mui/icons-material/CalendarMonthOutlined';
 
 type Role = 'admin' | 'user';
 
@@ -67,11 +69,22 @@ export default function Header({ darkMode, onToggleDarkMode }: AppHeaderProps) {
           adminOnly: false,
         },
         {
-          label: 'Solicitações',
+          label: 'Gerenciar Solicitações',
           path: '/admin/requests',
-          icon: <BeachAccessOutlined fontSize="small" />,
+          icon: <CalendarMonthOutlined fontSize="small" />,
           adminOnly: true,
         },
+        {
+          label: 'Minhas Solicitações',
+          path: '/vacations/me',
+          icon: <BeachAccessOutlined fontSize="small" />,
+          adminOnly: false,
+        },
+        {label: 'Usuários',
+          path: '/users',
+          icon: <GroupOutlined fontSize="small" />,
+          adminOnly: true,          
+        }
       ].filter((item) => (item.adminOnly ? isAdmin : true)),
     [isAdmin],
   );

@@ -16,7 +16,7 @@ class UserController {
         return rest;
       });
 
-      return res.status(HTTP_STATUS.OK).json({ safeUsers });
+      return res.status(HTTP_STATUS.OK).json(safeUsers);
     } catch (error) {
       const { status, message } = mapError(error);
       return res.status(status).json({ message });

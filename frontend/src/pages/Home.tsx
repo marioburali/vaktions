@@ -30,7 +30,7 @@ const cards: CardConfig[] = [
     key: 'manage-users',
     title: 'Gerenciar usuários',
     description: 'Cadastre novos colaboradores e ajuste permissões.',
-    path: '/admin/users',
+    path: '/users',
     onlyAdmin: true,
   },
   {

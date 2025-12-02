@@ -6,6 +6,7 @@ import './App.css';
 import VacationList from './pages/VacationsList';
 import VacationDetails from './pages/VacationDetails';
 import MyRequests from './pages/MyRequests';
+import ManageUsers from './pages/ManageUsers';
 
 export default function App() {
   return (
@@ -40,6 +41,14 @@ export default function App() {
         element={
           <PrivateRoute>
             <MyRequests />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/users"
+        element={
+          <PrivateRoute>
+            <ManageUsers />
           </PrivateRoute>
         }
       />
