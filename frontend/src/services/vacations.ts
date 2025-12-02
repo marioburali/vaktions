@@ -4,3 +4,29 @@ export async function getAllVacations() {
   const token = localStorage.getItem('token');
   return apiFetch('/vacations', { method: 'GET' }, token || undefined);
 }
+
+export async function approveVacation(
+  id: number
+) {
+  const token = localStorage.getItem('token');
+  return apiFetch(
+    `/vacations/${id}/approve`,
+    { method: 'PATCH' },
+    token || undefined
+  );
+}
+
+export async function rejectVacation(
+  id: number, notes?: string
+) {
+  const token = localStorage.getItem('token');
+  return apiFetch(
+    `/vacations/${id}/reject`,
+    {
+      method: 'PATCH',
+      body: JSON.stringify({ notes }),
+    },
+    token || undefined
+    
+  );
+}

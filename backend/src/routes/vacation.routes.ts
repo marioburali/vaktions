@@ -1,4 +1,3 @@
-// src/routes/vacation.routes.ts
 import { Router } from 'express';
 import vacationController from '../controllers/vacation.controller';
 import { authMiddleware } from '../middlewares/auth.middleware';

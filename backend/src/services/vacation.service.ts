@@ -217,12 +217,12 @@ class VacationService {
         {
           model: User,
           as: 'user',
-          attributes: ['id', 'name', 'email', 'role'],
+          attributes: ['id', 'name', 'email', 'role', 'availableVacationDays'],
         },
       ],
       order: [['requestedAt', 'DESC']],
     });
-  
+
     return vacations;
   }
 
@@ -243,8 +243,8 @@ class VacationService {
       throw new Error('Vacation not found');
     }
 
-    if (vacation.status !== 'pending') {
-      throw new Error('Only pending vacations can be approved');
+    if (vacation.status === 'approved') {
+      throw new Error('Only pending and rejected vacations can be approved');
     }
 
     const user = await User.findByPk(vacation.userId);
@@ -288,8 +288,22 @@ class VacationService {
       throw new Error('Vacation not found');
     }
 
-    if (vacation.status !== 'pending') {
-      throw new Error('Only pending vacations can be rejected');
+    if (vacation.status === 'rejected') {
+      throw new Error('Only pending and approved vacations can be rejected');
+    }
+
+    const originalStatus = vacation.status;
+
+    if (originalStatus === 'approved') {
+      const user = await User.findByPk(vacation.userId);
+
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      const availableVacationDays: number = user.availableVacationDays ?? 0;
+      user.availableVacationDays = availableVacationDays + vacation.totalDays;
+      await user.save();
     }
 
     vacation.status = 'rejected';
