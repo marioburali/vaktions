@@ -28,13 +28,13 @@ class VacationController {
         return res.status(401).json({ message: 'Unauthorized' });
       }
 
-      const { startDate, endDate, notes } = req.body;
+      const { startDate, endDate } = req.body;
 
       const input: CreateVacationInput = {
         userId: req.user.id,
         startDate,
         endDate,
-        notes,
+        // notes,
       };
 
       const vacation = await vacationService.createVacationRequest(input);

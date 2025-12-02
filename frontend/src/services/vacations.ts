@@ -7,11 +7,7 @@ export async function getAllVacations() {
 
 export async function getVacationsByUser() {
   const token = localStorage.getItem('token');
-  return apiFetch(
-    `/vacations/me`,
-    { method: 'GET' },
-    token || undefined
-  );
+  return apiFetch(`/vacations/me`, { method: 'GET' }, token || undefined);
 }
 
 export async function approveVacation(id: number) {
@@ -30,6 +26,18 @@ export async function rejectVacation(id: number, notes?: string) {
     {
       method: 'PATCH',
       body: JSON.stringify({ notes }),
+    },
+    token || undefined
+  );
+}
+
+export async function createVacation(startDate: string, endDate: string) {
+  const token = localStorage.getItem('token');
+  return apiFetch(
+    `/vacations`,
+    {
+      method: 'POST',
+      body: JSON.stringify({ startDate, endDate }),
     },
     token || undefined
   );

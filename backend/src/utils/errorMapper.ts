@@ -51,6 +51,7 @@ export function mapError(error: unknown): {
     'Employee cannot have more than 3 vacation periods in the same cycle',
     'On the third vacation period, the total days in the cycle must complete exactly 30 days',
     'With this request, it will not be possible to have a 14-day vacation period in this cycle',
+    'Total vacation days in the cycle cannot exceed 30 days',
   ];
 
   if (badRequestErrors.includes(msg)) {

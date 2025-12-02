@@ -16,8 +16,9 @@ import {
 import Header from '../components/Header';
 import ErrorModal from '../components/ErrorModal';
 
-import { getVacationsByUser } from '../services/vacations';
+import { createVacation, getVacationsByUser } from '../services/vacations';
 import { formatDate } from '../utils/formatDate';
+import CreateVacationModal from '../components/CreateVacationModal';
 
 export default function MyRequests() {
   const [darkMode, setDarkMode] = useState(() => {
@@ -27,6 +28,7 @@ export default function MyRequests() {
   const [vacations, setVacations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorModal, setErrorModal] = useState<string | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
 
   const bgColor = darkMode ? '#020617' : '#f3f4f6';
   const tableBg = darkMode ? '#0b1120' : '#ffffff';
@@ -90,8 +92,8 @@ export default function MyRequests() {
             Minhas solicitações de férias
           </Typography>
 
-          <Button variant="contained" onClick={() => {}}>
-            Nova solicitação
+          <Button variant="contained" onClick={() => setCreateOpen(true)}>
+            Nova Solicitação
           </Button>
         </Box>
 
@@ -168,6 +170,24 @@ export default function MyRequests() {
           </Paper>
         )}
       </Box>
+
+      <CreateVacationModal
+        open={createOpen}
+        onClose={() => setCreateOpen(false)}
+        loading={loading}
+        onConfirm={async ({ startDate, endDate }) => {
+          try {
+            setLoading(true);
+            await createVacation(startDate, endDate);
+            setCreateOpen(false);
+            loadData();
+          } catch (e: any) {
+            setErrorModal(e.message || 'Erro ao solicitar férias');
+          } finally {
+            setLoading(false);
+          }
+        }}
+      />
 
       <ErrorModal
         open={!!errorModal}
