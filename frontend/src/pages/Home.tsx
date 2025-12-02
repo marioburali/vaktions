@@ -37,7 +37,7 @@ const cards: CardConfig[] = [
     key: 'my-requests',
     title: 'Minhas solicitações',
     description: 'Veja o histórico e o status das suas solicitações de férias.',
-    path: '/my-requests',
+    path: '/vacations/me',
   },
   {
     key: 'my-data',

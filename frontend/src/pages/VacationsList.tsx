@@ -218,7 +218,11 @@ export default function VacationList() {
                           variant="text"
                           size="small"
                           sx={{ color: textSecondary }}
-                          onClick={() => navigate(`/admin/requests/${vac.id}`)}
+                          onClick={() =>
+                            navigate(`/admin/requests/${vac.id}`, {
+                              state: { vacation: vac },
+                            })
+                          }
                         >
                           Detalhes
                         </Button>

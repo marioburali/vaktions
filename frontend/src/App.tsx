@@ -4,6 +4,8 @@ import Home from './pages/Home';
 import PrivateRoute from './components/PrivateRoute';
 import './App.css';
 import VacationList from './pages/VacationsList';
+import VacationDetails from './pages/VacationDetails';
+import MyRequests from './pages/MyRequests';
 
 export default function App() {
   return (
@@ -22,6 +24,22 @@ export default function App() {
         element={
           <PrivateRoute>
             <VacationList />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/admin/requests/:id"
+        element={
+          <PrivateRoute>
+            <VacationDetails />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="vacations/me"
+        element={
+          <PrivateRoute>
+            <MyRequests />
           </PrivateRoute>
         }
       />
