@@ -14,5 +14,22 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  backend:
+    build: .
+    container_name: vaktions_backend
+    restart: always
+    ports:
+      - "3001:3001"
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: vaktions_dev
+    depends_on:
+      - db
+    volumes:
+      - .:/usr/src/app
+
 volumes:
   postgres_data:
