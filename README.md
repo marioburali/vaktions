@@ -132,6 +132,7 @@ Desfazer última migration:
 
 npx sequelize-cli db:migrate:undo
 
+
 🔮 Roadmap (Futuras Features)
 
 Painel administrativo para empresas
@@ -147,6 +148,7 @@ Permissões avançadas por cargo
 Notificações por e-mail
 
 Dashboard com indicadores do time
+
 
 🤝 Como Contribuir
 
