@@ -200,7 +200,7 @@ class VacationService {
     return vacation;
   }
 
-  // Lista todas as férias de um usuário 
+  // Lista todas as férias de um usuário
   public async getVacationsByUser(userId: number): Promise<Vacation[]> {
     const vacations = await Vacation.findAll({
       where: { userId },
@@ -313,6 +313,57 @@ class VacationService {
     await vacation.save();
 
     return vacation;
+  }
+
+  // localizar vacation por id
+  public async getVacationById(
+    vacationId: number,
+    userId: number,
+    role: 'user' | 'admin'
+  ): Promise<Vacation> {
+    const vacation = await Vacation.findByPk(vacationId);
+
+    if (!vacation) {
+      throw new Error('Vacation not found');
+    }
+
+    if (vacation.userId !== userId || role !== 'admin') {
+      throw new Error('Unauthorized to access this vacation');
+    }
+
+    return vacation;
+  }
+
+  // deletar vacation
+  public async deleteVacation(
+    vacationId: number,
+    userId: number,
+    role: 'user' | 'admin'
+  ): Promise<void> {
+    const vacation = await Vacation.findByPk(vacationId);
+
+    if (!vacation) {
+      throw new Error('Vacation not found');
+    }
+
+    // regra de permissão (exemplo)
+    if (role === 'user' && vacation.userId !== userId) {
+      throw new Error('Not allowed to delete this vacation');
+    }
+
+    if (vacation.status === 'approved') {
+      const user = await User.findByPk(vacation.userId);
+
+      if (!user) {
+        throw new Error('User not found');
+      }
+
+      const availableVacationDays: number = user.availableVacationDays ?? 0;
+      user.availableVacationDays = availableVacationDays + vacation.totalDays;
+      await user.save();
+    }
+
+    await vacation.destroy();
   }
 }
 

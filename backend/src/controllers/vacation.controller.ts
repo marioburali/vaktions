@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import vacationService, {
   CreateVacationInput,
 } from '../services/vacation.service';
@@ -176,6 +176,28 @@ class VacationController {
       return res.status(status).json({ message });
     }
   }
+
+  public deleteVacation = async (
+    req: AuthRequest,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      const vacationId = Number(req.params.id);
+      const userId = req.user.id;
+      const role = req.user.role;
+
+      await vacationService.deleteVacation(vacationId, userId, role);
+
+      return res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  };
 }
 
 export default new VacationController();

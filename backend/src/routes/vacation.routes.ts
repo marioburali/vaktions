@@ -28,4 +28,8 @@ router.patch('/:id/reject', (req, res) =>
   vacationController.rejectVacation(req, res)
 );
 
+// deletar vacation
+router.delete('/:id', (req, res, next) =>
+  vacationController.deleteVacation(req, res, next)
+);
 export default router;
