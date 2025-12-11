@@ -24,6 +24,7 @@ import {
 import { formatDate } from '../utils/formatDate';
 import CreateVacationModal from '../components/CreateVacationModal';
 import DeleteVacationModal from '../components/DeleteRequestVacationModal';
+import { EditOutlined } from '@mui/icons-material';
 
 export default function MyRequests() {
   const [darkMode, setDarkMode] = useState(() => {
@@ -184,7 +185,22 @@ export default function MyRequests() {
                     <TableCell sx={{ color: textSecondary }}>
                       {formatDate(vac.updatedAt)}
                     </TableCell>
-                    <TableCell sx={{ color: textSecondary }}>
+                    <TableCell>
+                      <EditOutlined
+                        onClick={() => {
+                          // setSelectedVacation(vac);
+                          // setCreateOpen(true);
+                        }}
+                        sx={{
+                          cursor: 'pointer',
+                          mr: 2,
+                          transition: '0.2s',
+                          '&:hover': {
+                            color: 'primary.dark',
+                            transform: 'scale(1.1)',
+                          },
+                        }}
+                      />
                       <DeleteOutlineIcon
                         onClick={() => {
                           setSelectedVacation(vac);
