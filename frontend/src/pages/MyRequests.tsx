@@ -15,10 +15,15 @@ import {
 
 import Header from '../components/Header';
 import ErrorModal from '../components/ErrorModal';
-
-import { createVacation, getVacationsByUser } from '../services/vacations';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import {
+  createVacation,
+  deleteVacation,
+  getVacationsByUser,
+} from '../services/vacations';
 import { formatDate } from '../utils/formatDate';
 import CreateVacationModal from '../components/CreateVacationModal';
+import DeleteVacationModal from '../components/DeleteRequestVacationModal';
 
 export default function MyRequests() {
   const [darkMode, setDarkMode] = useState(() => {
@@ -29,6 +34,8 @@ export default function MyRequests() {
   const [loading, setLoading] = useState(true);
   const [errorModal, setErrorModal] = useState<string | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [selectedVacation, setSelectedVacation] = useState<any>(null);
 
   const bgColor = darkMode ? '#020617' : '#f3f4f6';
   const tableBg = darkMode ? '#0b1120' : '#ffffff';
@@ -75,6 +82,19 @@ export default function MyRequests() {
         return 'default';
     }
   };
+
+  async function handleDelete() {
+    try {
+      setLoading(true);
+      await deleteVacation(selectedVacation.id);
+      setDeleteOpen(false);
+      loadData();
+    } catch (e: any) {
+      setErrorModal(e.message || 'Erro ao excluir solicitação');
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <Box sx={{ minHeight: '100vh', backgroundColor: bgColor }}>
@@ -128,6 +148,7 @@ export default function MyRequests() {
                   <TableCell sx={{ color: textSecondary }}>
                     Atualizado em
                   </TableCell>
+                  <TableCell sx={{ color: textSecondary }}>Ações</TableCell>
                 </TableRow>
               </TableHead>
 
@@ -163,6 +184,23 @@ export default function MyRequests() {
                     <TableCell sx={{ color: textSecondary }}>
                       {formatDate(vac.updatedAt)}
                     </TableCell>
+                    <TableCell sx={{ color: textSecondary }}>
+                      <DeleteOutlineIcon
+                        onClick={() => {
+                          setSelectedVacation(vac);
+                          setDeleteOpen(true);
+                        }}
+                        sx={{
+                          color: 'error.main',
+                          cursor: 'pointer',
+                          transition: '0.2s',
+                          '&:hover': {
+                            color: 'error.dark',
+                            transform: 'scale(1.1)',
+                          },
+                        }}
+                      />
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -188,7 +226,13 @@ export default function MyRequests() {
           }
         }}
       />
-
+      <DeleteVacationModal
+        open={deleteOpen}
+        onClose={() => setDeleteOpen(false)}
+        onConfirm={handleDelete}
+        loading={loading}
+        vacation={selectedVacation}
+      />
       <ErrorModal
         open={!!errorModal}
         message={errorModal || ''}

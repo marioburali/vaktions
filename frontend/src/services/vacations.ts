@@ -42,3 +42,14 @@ export async function createVacation(startDate: string, endDate: string) {
     token || undefined
   );
 }
+
+export async function deleteVacation(id: number) {
+  const token = localStorage.getItem('token');
+  return apiFetch(
+    `/vacations/${id}`,
+    {
+      method: 'DELETE',
+    },
+    token || undefined
+  );
+}
