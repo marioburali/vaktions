@@ -236,7 +236,7 @@ export default function MyRequests() {
             setCreateOpen(false);
             loadData();
           } catch (e: any) {
-            setErrorModal(e.message || 'Erro ao solicitar férias');
+            setErrorModal(e.message || 'Ops! Erro ao solicitar férias');
           } finally {
             setLoading(false);
           }
