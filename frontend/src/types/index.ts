@@ -1,13 +1,4 @@
-export interface User {}
-
-export interface Vacation {}
-
-export interface LoginResponse {
-  token: string;
-  user: {
-    id: number;
-    name: string;
-    role: 'user' | 'admin';
-    email: string;
-  };
-}
+export * from './user';
+export * from './vacation';
+export * from './auth';
+export * from './api';

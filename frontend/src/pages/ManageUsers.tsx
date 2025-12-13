@@ -30,29 +30,30 @@ import {
   deleteUser,
 } from '../services/users';
 import { formatDate } from '../utils/formatDate';
+import type { User, UserFormMode } from '../types';
 
-type Role = 'admin' | 'user';
+// type Role = 'admin' | 'user';
 
-export type User = {
-  id: number;
-  name: string;
-  email: string;
-  role: Role;
-  occupation: string;
-  hiredAt: string | null;
-  availableVacationDays: number;
-};
+// export type User = {
+//   id: number;
+//   name: string;
+//   email: string;
+//   role: Role;
+//   occupation: string;
+//   hiredAt: string | null;
+//   availableVacationDays: number;
+// };
 
-type UserFormData = {
-  name: string;
-  email: string;
-  role: Role;
-  occupation: string;
-  hiredAt: string;
-  password?: string;
-};
+// type UserFormData = {
+//   name: string;
+//   email: string;
+//   role: Role;
+//   occupation: string;
+//   hiredAt: string;
+//   password?: string;
+// };
 
-type UserFormMode = 'create' | 'edit';
+// type UserFormMode = 'create' | 'edit';
 
 export default function ManageUsers() {
   const [users, setUsers] = useState<User[]>([]);

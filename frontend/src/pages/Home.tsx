@@ -2,13 +2,7 @@ import { useEffect, useState } from 'react';
 import { Box, Typography, Paper } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
-
-type Role = 'admin' | 'user';
-
-type User = {
-  name?: string;
-  role?: Role;
-};
+import type { User } from '../types';
 
 type CardConfig = {
   key: string;

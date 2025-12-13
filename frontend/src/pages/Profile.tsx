@@ -2,18 +2,7 @@ import { useEffect, useState } from 'react';
 import { Box, Typography, Paper, Chip, Divider, Stack } from '@mui/material';
 import Header from '../components/Header';
 import { formatDate } from '../utils/formatDate';
-
-type Role = 'admin' | 'user';
-
-type User = {
-  id: number;
-  name: string;
-  email: string;
-  role: Role;
-  occupation?: string;
-  hiredAt?: string | null;
-  availableVacationDays: number;
-};
+import type { User } from '../types';
 
 export default function Profile() {
   const [user, setUser] = useState<User | null>(null);
