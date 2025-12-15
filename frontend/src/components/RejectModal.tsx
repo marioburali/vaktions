@@ -9,6 +9,8 @@ import {
   Typography,
 } from '@mui/material';
 import React from 'react';
+import { useTheme } from '../context/ThemeContext';
+import { colors } from '../theme/colors';
 
 type Props = {
   open: boolean;
@@ -32,6 +34,9 @@ export default function RejectModal({
   loading = false,
   vacation,
 }: Props) {
+  const { darkMode } = useTheme();
+  const theme = darkMode ? colors.dark : colors.light;
+
   const [notes, setNotes] = React.useState('');
   const [touched, setTouched] = React.useState(false);
 
@@ -46,23 +51,42 @@ export default function RejectModal({
 
   const handleSubmit = () => {
     setTouched(true);
-    if (isInvalid) return; // não deixa enviar
+    if (isInvalid) return;
     onConfirm(notes.trim());
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle>Rejeitar solicitação</DialogTitle>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      fullWidth
+      maxWidth="sm"
+      PaperProps={{
+        sx: {
+          backgroundColor: theme.tableBg,
+          border: `1px solid ${theme.border}`,
+          borderRadius: 3,
+        },
+      }}
+    >
+      <DialogTitle sx={{ color: theme.textMain }}>
+        Rejeitar solicitação
+      </DialogTitle>
 
-      <DialogContent dividers>
+      <DialogContent
+        dividers
+        sx={{
+          borderColor: theme.border,
+        }}
+      >
         {vacation && (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <Typography variant="body2">
+            <Typography variant="body2" sx={{ color: theme.textSecondary }}>
               <strong>Colaborador:</strong>{' '}
               {vacation.user?.name ?? `Usuário #${vacation.userId}`}
             </Typography>
 
-            <Typography variant="body2">
+            <Typography variant="body2" sx={{ color: theme.textSecondary }}>
               <strong>Período:</strong> {vacation.startDate} —{' '}
               {vacation.endDate}
             </Typography>
@@ -80,19 +104,39 @@ export default function RejectModal({
               helperText={
                 touched && isInvalid ? 'O motivo é obrigatório.' : ' '
               }
+              InputLabelProps={{
+                sx: { color: theme.textSecondary },
+              }}
+              InputProps={{
+                sx: {
+                  color: theme.textMain,
+                  backgroundColor: darkMode ? 'rgba(15,23,42,0.6)' : '#ffffff',
+                },
+              }}
             />
           </Box>
         )}
       </DialogContent>
 
-      <DialogActions>
-        <Button onClick={onClose}>Cancelar</Button>
+      <DialogActions sx={{ px: 3, pb: 2 }}>
+        <Button
+          onClick={onClose}
+          disabled={loading}
+          sx={{ color: theme.textSecondary }}
+        >
+          Cancelar
+        </Button>
 
         <Button
           variant="contained"
-          color="error"
           disabled={loading}
           onClick={handleSubmit}
+          sx={{
+            backgroundColor: theme.error,
+            '&:hover': {
+              backgroundColor: theme.errorHover,
+            },
+          }}
         >
           Confirmar rejeição
         </Button>

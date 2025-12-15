@@ -175,7 +175,6 @@ export default function VacationList() {
                   return (
                     <TableRow
                       key={vac.id}
-                      hover
                       sx={{
                         '&:hover': {
                           backgroundColor: theme.rowHover,

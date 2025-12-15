@@ -9,6 +9,8 @@ import {
   Box,
 } from '@mui/material';
 import { useEffect, useState } from 'react';
+import { useTheme } from '../context/ThemeContext';
+import { colors } from '../theme/colors';
 
 type Props = {
   open: boolean;
@@ -36,6 +38,9 @@ export default function UserModal({
   mode,
   user,
 }: Props) {
+  const { darkMode } = useTheme();
+  const theme = darkMode ? colors.dark : colors.light;
+
   const [form, setForm] = useState(EMPTY_FORM);
 
   useEffect(() => {
@@ -64,7 +69,6 @@ export default function UserModal({
 
   const isPasswordRequired = mode === 'create';
 
-  // validação simples de e-mail
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const emailInvalid =
     form.email.trim().length > 0 && !emailRegex.test(form.email.trim());
@@ -83,12 +87,29 @@ export default function UserModal({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      fullWidth
+      maxWidth="sm"
+      PaperProps={{
+        sx: {
+          backgroundColor: theme.tableBg,
+          border: `1px solid ${theme.border}`,
+          borderRadius: 3,
+        },
+      }}
+    >
+      <DialogTitle sx={{ color: theme.textMain }}>
         {mode === 'create' ? 'Criar usuário' : 'Editar usuário'}
       </DialogTitle>
 
-      <DialogContent dividers>
+      <DialogContent
+        dividers
+        sx={{
+          borderColor: theme.border,
+        }}
+      >
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <TextField
             label="Nome"
@@ -96,6 +117,13 @@ export default function UserModal({
             value={form.name}
             onChange={(e) => handleChange('name', e.target.value)}
             autoComplete="off"
+            InputLabelProps={{ sx: { color: theme.textSecondary } }}
+            InputProps={{
+              sx: {
+                color: theme.textMain,
+                backgroundColor: darkMode ? 'rgba(15,23,42,0.6)' : '#ffffff',
+              },
+            }}
           />
 
           <TextField
@@ -106,7 +134,14 @@ export default function UserModal({
             onChange={(e) => handleChange('email', e.target.value)}
             autoComplete="off"
             error={emailInvalid}
-            helperText={emailInvalid ? 'Informe um email válido.' : ''}
+            helperText={emailInvalid ? 'Informe um email válido.' : ' '}
+            InputLabelProps={{ sx: { color: theme.textSecondary } }}
+            InputProps={{
+              sx: {
+                color: theme.textMain,
+                backgroundColor: darkMode ? 'rgba(15,23,42,0.6)' : '#ffffff',
+              },
+            }}
           />
 
           <TextField
@@ -118,6 +153,13 @@ export default function UserModal({
             onChange={(e) => handleChange('password', e.target.value)}
             placeholder={mode === 'edit' ? 'Preencha caso queira trocar' : ''}
             autoComplete="new-password"
+            InputLabelProps={{ sx: { color: theme.textSecondary } }}
+            InputProps={{
+              sx: {
+                color: theme.textMain,
+                backgroundColor: darkMode ? 'rgba(15,23,42,0.6)' : '#ffffff',
+              },
+            }}
           />
 
           <TextField
@@ -126,6 +168,13 @@ export default function UserModal({
             fullWidth
             value={form.role}
             onChange={(e) => handleChange('role', e.target.value)}
+            InputLabelProps={{ sx: { color: theme.textSecondary } }}
+            InputProps={{
+              sx: {
+                color: theme.textMain,
+                backgroundColor: darkMode ? 'rgba(15,23,42,0.6)' : '#ffffff',
+              },
+            }}
           >
             <MenuItem value="user">Usuário</MenuItem>
             <MenuItem value="admin">Admin</MenuItem>
@@ -137,6 +186,13 @@ export default function UserModal({
             value={form.occupation}
             onChange={(e) => handleChange('occupation', e.target.value)}
             autoComplete="off"
+            InputLabelProps={{ sx: { color: theme.textSecondary } }}
+            InputProps={{
+              sx: {
+                color: theme.textMain,
+                backgroundColor: darkMode ? 'rgba(15,23,42,0.6)' : '#ffffff',
+              },
+            }}
           />
 
           <TextField
@@ -145,17 +201,32 @@ export default function UserModal({
             fullWidth
             value={form.hiredAt}
             onChange={(e) => handleChange('hiredAt', e.target.value)}
-            InputLabelProps={{ shrink: true }}
+            InputLabelProps={{
+              shrink: true,
+              sx: { color: theme.textSecondary },
+            }}
+            InputProps={{
+              sx: {
+                color: theme.textMain,
+                backgroundColor: darkMode ? 'rgba(15,23,42,0.6)' : '#ffffff',
+              },
+            }}
           />
         </Box>
       </DialogContent>
 
-      <DialogActions>
+      <DialogActions sx={{ px: 3, pb: 2 }}>
         <Button
           onClick={onClose}
           disabled={loading}
-          variant="outlined"
-          color="error"
+          sx={{
+            color: theme.textSecondary,
+            '&:hover': {
+              backgroundColor: darkMode
+                ? 'rgba(148,163,184,0.12)'
+                : 'rgba(148,163,184,0.2)',
+            },
+          }}
         >
           Cancelar
         </Button>
@@ -164,6 +235,19 @@ export default function UserModal({
           variant="contained"
           disabled={loading || !canSubmit}
           onClick={handleConfirmClick}
+          sx={{
+            backgroundColor: theme.blueButton,
+            color: theme.textMain,
+            '&:hover': {
+              backgroundColor: theme.blueButtonHover,
+            },
+            '&.Mui-disabled': {
+              backgroundColor: darkMode
+                ? 'rgba(148,163,184,0.25)'
+                : 'rgba(148,163,184,0.4)',
+              color: darkMode ? 'rgba(226,232,240,0.6)' : 'rgba(30,41,59,0.6)',
+            },
+          }}
         >
           {mode === 'create' ? 'Criar' : 'Salvar alterações'}
         </Button>
