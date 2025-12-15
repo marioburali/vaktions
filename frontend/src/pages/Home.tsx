@@ -3,6 +3,8 @@ import { Box, Typography, Paper } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import type { User } from '../types';
+import { useTheme } from '../context/ThemeContext';
+import { colors } from '../theme/colors';
 
 type CardConfig = {
   key: string;
@@ -44,16 +46,15 @@ const cards: CardConfig[] = [
 export default function Home() {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
-  const [darkMode, setDarkMode] = useState<boolean>(() => {
-    return localStorage.getItem('theme') === 'dark';
-  });
+
+  const { darkMode } = useTheme();
+  const theme = darkMode ? colors.dark : colors.light;
 
   useEffect(() => {
     try {
       const stored = localStorage.getItem('user');
       if (stored) {
-        const parsed = JSON.parse(stored);
-        setUser(parsed);
+        setUser(JSON.parse(stored));
       }
     } catch {
       setUser(null);
@@ -66,109 +67,47 @@ export default function Home() {
     card.onlyAdmin ? isAdmin : true
   );
 
-  const handleCardClick = (path: string) => {
-    navigate(path);
-  };
-
-  const handleToggleDarkMode = () => {
-    setDarkMode((prev) => {
-      const next = !prev;
-      localStorage.setItem('theme', next ? 'dark' : 'light');
-      return next;
-    });
-  };
-
-  const bgColor = darkMode ? '#020617' : '#f3f4f6';
-  const cardBg = darkMode ? '#0b1120' : '#ffffff';
-  const cardBorder = darkMode
-    ? '1px solid rgba(148,163,184,0.3)'
-    : '1px solid #e5e7eb';
-  const titleColor = darkMode ? '#e5e7eb' : '#0f172a';
-  const textColor = darkMode ? '#cbd5f5' : '#4b5563';
-
   return (
-    <Box sx={{ minHeight: '100vh', backgroundColor: bgColor }}>
-      <Header darkMode={darkMode} onToggleDarkMode={handleToggleDarkMode} />
-      <Box
-        sx={{
-          px: { xs: 2, md: 4 },
-          py: { xs: 3, md: 4 },
-          color: titleColor,
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-      >
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: { xs: 'column', md: 'row' },
-            justifyContent: 'space-between',
-            alignItems: { xs: 'flex-start', md: 'center' },
-            gap: 2,
-            mb: 4,
-          }}
-        >
-          <Box>
-            <Typography variant="h5" fontWeight={600}>
-              Olá, {user?.name || 'colaborador(a)'}!
-            </Typography>
-            <Typography variant="body2" sx={{ color: textColor, mt: 0.5 }}>
-              Seja bem vindo ao melhor sistema de gerenciamento de férias do mundo.
-            </Typography>
-            {isAdmin && (
-              <Typography variant="caption" sx={{ color: textColor, mt: 0.5 }}>
-                Você está logado como <strong>admin</strong>.
-              </Typography>
-            )}
-          </Box>
-        </Box>
+    <Box sx={{ minHeight: '100vh', backgroundColor: theme.bg }}>
+      <Header />
 
-        {/* Cards */}
+      <Box sx={{ px: { xs: 2, md: 4 }, py: 4 }}>
+        <Typography variant="h5" fontWeight={600} sx={{ color: theme.textMain }}>
+          Olá, {user?.name || 'colaborador(a)'}!
+        </Typography>
+
+        <Typography variant="body2" sx={{ color: theme.textSecondary, mb: 4 }}>
+          Seja bem-vindo ao melhor sistema de gerenciamento de férias do mundo.
+        </Typography>
+
         <Box
           sx={{
             display: 'grid',
-            gridTemplateColumns: {
-              xs: '1fr',
-              md: 'repeat(2, minmax(0, 1fr))',
-            },
+            gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' },
             gap: 3,
           }}
         >
           {visibleCards.map((card) => (
             <Paper
               key={card.key}
-              onClick={() => handleCardClick(card.path)}
+              onClick={() => navigate(card.path)}
               sx={{
-                backgroundColor: cardBg,
-                border: cardBorder,
+                backgroundColor: theme.cardBg,
+                border: `1px solid ${theme.border}`,
                 borderRadius: 3,
                 p: 3,
                 cursor: 'pointer',
-                transition:
-                  'transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease',
-                boxShadow: darkMode
-                  ? '0 10px 30px rgba(15,23,42,0.6)'
-                  : '0 8px 20px rgba(15,23,42,0.1)',
+                transition: '0.2s',
                 '&:hover': {
                   transform: 'translateY(-3px)',
-                  boxShadow: darkMode
-                    ? '0 16px 40px rgba(15,23,42,0.8)'
-                    : '0 12px 30px rgba(15,23,42,0.18)',
-                  borderColor: darkMode
-                    ? 'rgba(129,140,248,0.8)'
-                    : 'rgba(59,130,246,0.8)',
+                  borderColor: theme.border,
                 },
               }}
             >
-              <Typography
-                variant="h6"
-                fontWeight={600}
-                mb={1}
-                sx={{ color: textColor }}
-              >
+              <Typography variant="h6" sx={{ color: theme.textMain }} fontWeight={600}>
                 {card.title}
               </Typography>
-              <Typography variant="body2" sx={{ color: textColor }}>
+              <Typography variant="body2" sx={{ color: theme.textSecondary }}>
                 {card.description}
               </Typography>
             </Paper>

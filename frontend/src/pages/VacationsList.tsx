@@ -24,6 +24,9 @@ import Header from '../components/Header';
 import RejectModal from '../components/RejectModal';
 import ErrorModal from '../components/ErrorModal';
 
+import { useTheme } from '../context/ThemeContext';
+import { colors } from '../theme/colors';
+
 export default function VacationList() {
   const [vacations, setVacations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,9 +39,9 @@ export default function VacationList() {
 
   const navigate = useNavigate();
 
-  const [darkMode, setDarkMode] = useState<boolean>(() => {
-    return localStorage.getItem('theme') === 'dark';
-  });
+  // 🌙 Tema centralizado
+  const { darkMode } = useTheme();
+  const theme = darkMode ? colors.dark : colors.light;
 
   useEffect(() => {
     loadData();
@@ -56,14 +59,6 @@ export default function VacationList() {
     }
   }
 
-  const handleToggleDarkMode = () => {
-    setDarkMode((prev) => {
-      const next = !prev;
-      localStorage.setItem('theme', next ? 'dark' : 'light');
-      return next;
-    });
-  };
-
   const statusColor = (status: string) => {
     switch (status) {
       case 'pending':
@@ -76,15 +71,6 @@ export default function VacationList() {
         return 'default';
     }
   };
-
-  const bgColor = darkMode ? '#020617' : '#f3f4f6';
-  const tableBg = darkMode ? '#0b1120' : '#ffffff';
-  const textMain = darkMode ? '#e5e7eb' : '#0f172a';
-  const textSecondary = darkMode ? '#cbd5f5' : '#4b5563';
-  const borderColor = darkMode ? 'rgba(148,163,184,0.2)' : '#e5e7eb';
-  const rowHoverBg = darkMode
-    ? 'rgba(148,163,184,0.1)'
-    : 'rgba(148,163,184,0.08)';
 
   const handleApprove = async (vac: any) => {
     try {
@@ -124,15 +110,15 @@ export default function VacationList() {
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', backgroundColor: bgColor }}>
-      <Header darkMode={darkMode} onToggleDarkMode={handleToggleDarkMode} />
+    <Box sx={{ minHeight: '100vh', backgroundColor: theme.bg }}>
+      <Header />
 
       <Box sx={{ p: 4 }}>
         <Typography
           variant="h5"
           fontWeight={600}
           mb={1.5}
-          sx={{ color: textMain }}
+          sx={{ color: theme.textMain }}
         >
           Gerenciar solicitações de férias
         </Typography>
@@ -144,7 +130,7 @@ export default function VacationList() {
         )}
 
         {!loading && vacations.length === 0 && (
-          <Typography mt={2} sx={{ color: textSecondary }}>
+          <Typography mt={2} sx={{ color: theme.textSecondary }}>
             Nenhuma solicitação encontrada.
           </Typography>
         )}
@@ -152,25 +138,33 @@ export default function VacationList() {
         {!loading && vacations.length > 0 && (
           <Paper
             sx={{
-              backgroundColor: tableBg,
+              backgroundColor: theme.tableBg,
               borderRadius: 3,
               overflow: 'hidden',
-              border: `1px solid ${borderColor}`,
+              border: `1px solid ${theme.border}`,
             }}
           >
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell sx={{ color: textSecondary }}>
+                  <TableCell sx={{ color: theme.textSecondary }}>
                     Colaborador
                   </TableCell>
-                  <TableCell sx={{ color: textSecondary }}>Período</TableCell>
-                  <TableCell sx={{ color: textSecondary }}>Dias</TableCell>
-                  <TableCell sx={{ color: textSecondary }}>
+                  <TableCell sx={{ color: theme.textSecondary }}>
+                    Período
+                  </TableCell>
+                  <TableCell sx={{ color: theme.textSecondary }}>
+                    Dias
+                  </TableCell>
+                  <TableCell sx={{ color: theme.textSecondary }}>
                     Dias Disponíveis
                   </TableCell>
-                  <TableCell sx={{ color: textSecondary }}>Status</TableCell>
-                  <TableCell sx={{ color: textSecondary }}>Ações</TableCell>
+                  <TableCell sx={{ color: theme.textSecondary }}>
+                    Status
+                  </TableCell>
+                  <TableCell sx={{ color: theme.textSecondary }}>
+                    Ações
+                  </TableCell>
                 </TableRow>
               </TableHead>
 
@@ -183,22 +177,24 @@ export default function VacationList() {
                       key={vac.id}
                       hover
                       sx={{
-                        '&:hover': { backgroundColor: rowHoverBg },
+                        '&:hover': {
+                          backgroundColor: theme.rowHover,
+                        },
                       }}
                     >
-                      <TableCell sx={{ color: textSecondary }}>
+                      <TableCell sx={{ color: theme.textSecondary }}>
                         {vac.user?.name ?? `Usuário #${vac.userId}`}
                       </TableCell>
 
-                      <TableCell sx={{ color: textSecondary }}>
+                      <TableCell sx={{ color: theme.textSecondary }}>
                         {vac.startDate} — {vac.endDate}
                       </TableCell>
 
-                      <TableCell sx={{ color: textSecondary }}>
+                      <TableCell sx={{ color: theme.textSecondary }}>
                         {vac.totalDays}
                       </TableCell>
 
-                      <TableCell sx={{ color: textSecondary }}>
+                      <TableCell sx={{ color: theme.textSecondary }}>
                         {vac.user?.availableVacationDays ?? '—'}
                       </TableCell>
 
@@ -217,7 +213,7 @@ export default function VacationList() {
                         <Button
                           variant="text"
                           size="small"
-                          sx={{ color: textSecondary }}
+                          sx={{ color: theme.textSecondary }}
                           onClick={() =>
                             navigate(`/admin/requests/${vac.id}`, {
                               state: { vacation: vac },
@@ -231,7 +227,10 @@ export default function VacationList() {
                           variant="outlined"
                           size="small"
                           disabled={isSubmitting}
-                          sx={{ borderColor, color: textSecondary }}
+                          sx={{
+                            borderColor: theme.border,
+                            color: theme.textSecondary,
+                          }}
                           onClick={() => handleApprove(vac)}
                         >
                           Aprovar
@@ -241,7 +240,10 @@ export default function VacationList() {
                           variant="outlined"
                           size="small"
                           disabled={isSubmitting}
-                          sx={{ borderColor, color: textSecondary }}
+                          sx={{
+                            borderColor: theme.border,
+                            color: theme.textSecondary,
+                          }}
                           onClick={() => openRejectModal(vac)}
                         >
                           Rejeitar

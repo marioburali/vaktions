@@ -16,36 +16,32 @@ import {
 import Header from '../components/Header';
 import ErrorModal from '../components/ErrorModal';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import { EditOutlined } from '@mui/icons-material';
+
 import {
   createVacation,
   deleteVacation,
   getVacationsByUser,
 } from '../services/vacations';
+
 import { formatDate } from '../utils/formatDate';
 import CreateVacationModal from '../components/CreateVacationModal';
 import DeleteVacationModal from '../components/DeleteRequestVacationModal';
-import { EditOutlined } from '@mui/icons-material';
+
+import { useTheme } from '../context/ThemeContext';
+import { colors } from '../theme/colors';
 
 export default function MyRequests() {
-  const [darkMode, setDarkMode] = useState(() => {
-    return localStorage.getItem('theme') === 'dark';
-  });
-
-  const [vacations, setVacations] = useState([]);
+  const [vacations, setVacations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorModal, setErrorModal] = useState<string | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [selectedVacation, setSelectedVacation] = useState<any>(null);
 
-  const bgColor = darkMode ? '#020617' : '#f3f4f6';
-  const tableBg = darkMode ? '#0b1120' : '#ffffff';
-  const textMain = darkMode ? '#e5e7eb' : '#0f172a';
-  const textSecondary = darkMode ? '#cbd5f5' : '#4b5563';
-  const borderColor = darkMode ? 'rgba(148,163,184,0.2)' : '#e5e7eb';
-  const rowHoverBg = darkMode
-    ? 'rgba(148,163,184,0.1)'
-    : 'rgba(148,163,184,0.08)';
+  // 🌙 Tema centralizado
+  const { darkMode } = useTheme();
+  const theme = darkMode ? colors.dark : colors.light;
 
   useEffect(() => {
     loadData();
@@ -63,14 +59,6 @@ export default function MyRequests() {
     }
   }
 
-  const handleToggleDarkMode = () => {
-    setDarkMode((prev) => {
-      const next = !prev;
-      localStorage.setItem('theme', next ? 'dark' : 'light');
-      return next;
-    });
-  };
-
   const statusColor = (status: string) => {
     switch (status) {
       case 'pending':
@@ -85,11 +73,13 @@ export default function MyRequests() {
   };
 
   async function handleDelete() {
+    if (!selectedVacation) return;
+
     try {
       setLoading(true);
       await deleteVacation(selectedVacation.id);
       setDeleteOpen(false);
-      loadData();
+      await loadData();
     } catch (e: any) {
       setErrorModal(e.message || 'Erro ao excluir solicitação');
     } finally {
@@ -98,8 +88,8 @@ export default function MyRequests() {
   }
 
   return (
-    <Box sx={{ minHeight: '100vh', backgroundColor: bgColor }}>
-      <Header darkMode={darkMode} onToggleDarkMode={handleToggleDarkMode} />
+    <Box sx={{ minHeight: '100vh', backgroundColor: theme.bg }}>
+      <Header />
 
       <Box sx={{ p: 4 }}>
         <Box
@@ -109,7 +99,11 @@ export default function MyRequests() {
             mb: 3,
           }}
         >
-          <Typography variant="h5" fontWeight={600} sx={{ color: textMain }}>
+          <Typography
+            variant="h5"
+            fontWeight={600}
+            sx={{ color: theme.textMain }}
+          >
             Minhas solicitações de férias
           </Typography>
 
@@ -125,7 +119,7 @@ export default function MyRequests() {
         )}
 
         {!loading && vacations.length === 0 && (
-          <Typography sx={{ color: textSecondary }}>
+          <Typography sx={{ color: theme.textSecondary }}>
             Você ainda não possui solicitações.
           </Typography>
         )}
@@ -133,23 +127,33 @@ export default function MyRequests() {
         {!loading && vacations.length > 0 && (
           <Paper
             sx={{
-              backgroundColor: tableBg,
+              backgroundColor: theme.tableBg,
               borderRadius: 3,
               overflow: 'hidden',
-              border: `1px solid ${borderColor}`,
+              border: `1px solid ${theme.border}`,
             }}
           >
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell sx={{ color: textSecondary }}>Período</TableCell>
-                  <TableCell sx={{ color: textSecondary }}>Dias</TableCell>
-                  <TableCell sx={{ color: textSecondary }}>Status</TableCell>
-                  <TableCell sx={{ color: textSecondary }}>Motivo</TableCell>
-                  <TableCell sx={{ color: textSecondary }}>
+                  <TableCell sx={{ color: theme.textSecondary }}>
+                    Período
+                  </TableCell>
+                  <TableCell sx={{ color: theme.textSecondary }}>
+                    Dias
+                  </TableCell>
+                  <TableCell sx={{ color: theme.textSecondary }}>
+                    Status
+                  </TableCell>
+                  <TableCell sx={{ color: theme.textSecondary }}>
+                    Motivo
+                  </TableCell>
+                  <TableCell sx={{ color: theme.textSecondary }}>
                     Atualizado em
                   </TableCell>
-                  <TableCell sx={{ color: textSecondary }}>Ações</TableCell>
+                  <TableCell sx={{ color: theme.textSecondary }}>
+                    Ações
+                  </TableCell>
                 </TableRow>
               </TableHead>
 
@@ -159,14 +163,16 @@ export default function MyRequests() {
                     key={vac.id}
                     hover
                     sx={{
-                      '&:hover': { backgroundColor: rowHoverBg },
+                      '&:hover': {
+                        backgroundColor: theme.rowHover,
+                      },
                     }}
                   >
-                    <TableCell sx={{ color: textSecondary }}>
+                    <TableCell sx={{ color: theme.textSecondary }}>
                       {formatDate(vac.startDate)} — {formatDate(vac.endDate)}
                     </TableCell>
 
-                    <TableCell sx={{ color: textSecondary }}>
+                    <TableCell sx={{ color: theme.textSecondary }}>
                       {vac.totalDays}
                     </TableCell>
 
@@ -179,41 +185,44 @@ export default function MyRequests() {
                       />
                     </TableCell>
 
-                    <TableCell sx={{ color: textSecondary }}>
+                    <TableCell sx={{ color: theme.textSecondary }}>
                       {vac.notes || '—'}
                     </TableCell>
-                    <TableCell sx={{ color: textSecondary }}>
+
+                    <TableCell sx={{ color: theme.textSecondary }}>
                       {formatDate(vac.updatedAt)}
                     </TableCell>
+
                     <TableCell>
                       <EditOutlined
-                        onClick={() => {
-                          // setSelectedVacation(vac);
-                          // setCreateOpen(true);
-                        }}
                         sx={{
                           cursor: 'pointer',
                           mr: 2,
                           transition: '0.2s',
+                          color: theme.textSecondary,
                           '&:hover': {
-                            color: 'primary.dark',
+                            color: theme.textMain,
                             transform: 'scale(1.1)',
                           },
                         }}
+                        onClick={() => {
+                          // edição futura
+                        }}
                       />
+
                       <DeleteOutlineIcon
+                        sx={{
+                          cursor: 'pointer',
+                          color: theme.error,
+                          transition: '0.2s',
+                          '&:hover': {
+                            color: theme.errorHover,
+                            transform: 'scale(1.1)',
+                          },
+                        }}
                         onClick={() => {
                           setSelectedVacation(vac);
                           setDeleteOpen(true);
-                        }}
-                        sx={{
-                          color: 'error.main',
-                          cursor: 'pointer',
-                          transition: '0.2s',
-                          '&:hover': {
-                            color: 'error.dark',
-                            transform: 'scale(1.1)',
-                          },
                         }}
                       />
                     </TableCell>
@@ -234,7 +243,7 @@ export default function MyRequests() {
             setLoading(true);
             await createVacation(startDate, endDate);
             setCreateOpen(false);
-            loadData();
+            await loadData();
           } catch (e: any) {
             setErrorModal(e.message || 'Ops! Erro ao solicitar férias');
           } finally {
@@ -242,6 +251,7 @@ export default function MyRequests() {
           }
         }}
       />
+
       <DeleteVacationModal
         open={deleteOpen}
         onClose={() => setDeleteOpen(false)}
@@ -249,6 +259,7 @@ export default function MyRequests() {
         loading={loading}
         vacation={selectedVacation}
       />
+
       <ErrorModal
         open={!!errorModal}
         message={errorModal || ''}
