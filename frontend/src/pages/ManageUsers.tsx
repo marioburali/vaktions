@@ -30,7 +30,9 @@ import {
   deleteUser,
 } from '../services/users';
 import { formatDate } from '../utils/formatDate';
-import type { User, UserFormMode } from '../types';
+import type { User, UserFormData, UserFormMode } from '../types';
+import { colors } from '../theme/colors';
+import { useTheme } from '../context/ThemeContext';
 
 // type Role = 'admin' | 'user';
 
@@ -59,9 +61,8 @@ export default function ManageUsers() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const [darkMode, setDarkMode] = useState<boolean>(() => {
-    return localStorage.getItem('theme') === 'dark';
-  });
+  const { darkMode } = useTheme();
+  const theme = darkMode ? colors.dark : colors.light;
 
   const [errorModalOpen, setErrorModalOpen] = useState(false);
   const [errorModalMessage, setErrorModalMessage] = useState('');
@@ -92,14 +93,6 @@ export default function ManageUsers() {
       setLoading(false);
     }
   }
-
-  const handleToggleDarkMode = () => {
-    setDarkMode((prev) => {
-      const next = !prev;
-      localStorage.setItem('theme', next ? 'dark' : 'light');
-      return next;
-    });
-  };
 
   const handleOpenCreate = () => {
     setUserModalMode('create');
@@ -194,18 +187,9 @@ export default function ManageUsers() {
     }
   };
 
-  const bgColor = darkMode ? '#020617' : '#f3f4f6';
-  const tableBg = darkMode ? '#0b1120' : '#ffffff';
-  const textMain = darkMode ? '#e5e7eb' : '#0f172a';
-  const textSecondary = darkMode ? '#cbd5f5' : '#4b5563';
-  const borderColor = darkMode ? 'rgba(148,163,184,0.2)' : '#e5e7eb';
-  const rowHoverBg = darkMode
-    ? 'rgba(148,163,184,0.1)'
-    : 'rgba(148,163,184,0.08)';
-
   return (
-    <Box sx={{ minHeight: '100vh', backgroundColor: bgColor }}>
-      <Header darkMode={darkMode} onToggleDarkMode={handleToggleDarkMode} />
+    <Box sx={{ minHeight: '100vh', backgroundColor: theme.bg }}>
+      <Header />
 
       <Box sx={{ p: 4 }}>
         <Box
@@ -218,10 +202,10 @@ export default function ManageUsers() {
           }}
         >
           <Box>
-            <Typography variant="h5" fontWeight={600} sx={{ color: textMain }}>
+            <Typography variant="h5" fontWeight={600} sx={{ color: theme.textMain }}>
               Gerenciar usuários
             </Typography>
-            <Typography variant="body2" sx={{ color: textSecondary }}>
+            <Typography variant="body2" sx={{ color: theme.textSecondary }}>
               Cadastre, edite ou remova colaboradores do sistema.
             </Typography>
           </Box>
@@ -242,7 +226,7 @@ export default function ManageUsers() {
         )}
 
         {!loading && users.length === 0 && (
-          <Typography mt={2} sx={{ color: textSecondary }}>
+          <Typography mt={2} sx={{ color: theme.textSecondary }}>
             Nenhum usuário encontrado.
           </Typography>
         )}
@@ -250,25 +234,25 @@ export default function ManageUsers() {
         {!loading && users.length > 0 && (
           <Paper
             sx={{
-              backgroundColor: tableBg,
+              backgroundColor: theme.tableBg,
               borderRadius: 3,
               overflow: 'hidden',
-              border: `1px solid ${borderColor}`,
+              border: `1px solid ${theme.border}`,
               mt: 2,
             }}
           >
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell sx={{ color: textSecondary }}>Nome</TableCell>
-                  <TableCell sx={{ color: textSecondary }}>Email</TableCell>
-                  <TableCell sx={{ color: textSecondary }}>Cargo</TableCell>
-                  <TableCell sx={{ color: textSecondary }}>Admissão</TableCell>
-                  <TableCell sx={{ color: textSecondary }}>
+                  <TableCell sx={{ color: theme.textSecondary }}>Nome</TableCell>
+                  <TableCell sx={{ color: theme.textSecondary }}>Email</TableCell>
+                  <TableCell sx={{ color: theme.textSecondary }}>Cargo</TableCell>
+                  <TableCell sx={{ color: theme.textSecondary }}>Admissão</TableCell>
+                  <TableCell sx={{ color: theme.textSecondary }}>
                     Dias de férias
                   </TableCell>
-                  <TableCell sx={{ color: textSecondary }}>Perfil</TableCell>
-                  <TableCell sx={{ color: textSecondary }}>Ações</TableCell>
+                  <TableCell sx={{ color: theme.textSecondary }}>Perfil</TableCell>
+                  <TableCell sx={{ color: theme.textSecondary }}>Ações</TableCell>
                 </TableRow>
               </TableHead>
 
@@ -279,23 +263,23 @@ export default function ManageUsers() {
                     hover
                     sx={{
                       '&:hover': {
-                        backgroundColor: rowHoverBg,
+                        backgroundColor: theme.rowHover,
                       },
                     }}
                   >
-                    <TableCell sx={{ color: textSecondary }}>
+                    <TableCell sx={{ color: theme.textSecondary }}>
                       {user.name}
                     </TableCell>
-                    <TableCell sx={{ color: textSecondary }}>
+                    <TableCell sx={{ color: theme.textSecondary }}>
                       {user.email}
                     </TableCell>
-                    <TableCell sx={{ color: textSecondary }}>
+                    <TableCell sx={{ color: theme.textSecondary }}>
                       {user.occupation}
                     </TableCell>
-                    <TableCell sx={{ color: textSecondary }}>
+                    <TableCell sx={{ color: theme.textSecondary }}>
                       {user.hiredAt ? formatDate(user.hiredAt) : '—'}
                     </TableCell>
-                    <TableCell sx={{ color: textSecondary }}>
+                    <TableCell sx={{ color: theme.textSecondary }}>
                       {user.availableVacationDays}
                     </TableCell>
                     <TableCell>
@@ -315,7 +299,7 @@ export default function ManageUsers() {
                           >
                             <EditIcon
                               fontSize="small"
-                              sx={{ color: textSecondary }}
+                              sx={{ color: theme.textSecondary }}
                             />
                           </IconButton>
                         </Tooltip>

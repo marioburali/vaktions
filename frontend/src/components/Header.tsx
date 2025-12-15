@@ -24,6 +24,8 @@ import {
 } from '@mui/icons-material';
 import { useLocation, useNavigate } from 'react-router-dom';
 import CalendarMonthOutlined from '@mui/icons-material/CalendarMonthOutlined';
+import { useTheme } from '../context/ThemeContext';
+import { colors } from '../theme/colors';
 
 type Role = 'admin' | 'user';
 
@@ -33,15 +35,12 @@ type User = {
   role?: Role;
 };
 
-type AppHeaderProps = {
-  darkMode: boolean;
-  onToggleDarkMode: () => void;
-};
-
-export default function Header({ darkMode, onToggleDarkMode }: AppHeaderProps) {
+export default function Header() {
   const [user, setUser] = useState<User | null>(null);
   const [anchorUser, setAnchorUser] = useState<null | HTMLElement>(null);
   const [anchorNav, setAnchorNav] = useState<null | HTMLElement>(null);
+  const { darkMode, toggleTheme } = useTheme();
+  const theme = darkMode ? colors.dark : colors.light;
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -80,13 +79,14 @@ export default function Header({ darkMode, onToggleDarkMode }: AppHeaderProps) {
           icon: <BeachAccessOutlined fontSize="small" />,
           adminOnly: false,
         },
-        {label: 'Usuários',
+        {
+          label: 'Usuários',
           path: '/users',
           icon: <GroupOutlined fontSize="small" />,
-          adminOnly: true,          
-        }
+          adminOnly: true,
+        },
       ].filter((item) => (item.adminOnly ? isAdmin : true)),
-    [isAdmin],
+    [isAdmin]
   );
 
   const handleLogout = () => {
@@ -130,15 +130,15 @@ export default function Header({ darkMode, onToggleDarkMode }: AppHeaderProps) {
       position="static"
       elevation={0}
       sx={{
-        backgroundColor: darkMode ? 'rgba(15,23,42,0.95)' : '#ffffff',
-        borderBottom: darkMode
-          ? '1px solid rgba(148,163,184,0.3)'
-          : '1px solid #e5e7eb',
-        color: darkMode ? '#e5e7eb' : '#0f172a',
+        backgroundColor: theme.bg,
+        borderBottom: `1px solid ${theme.border}`,
+        color: theme.textMain,
         backdropFilter: 'blur(16px)',
       }}
     >
-      <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', gap: 2 }}>
+      <Toolbar
+        sx={{ display: 'flex', justifyContent: 'space-between', gap: 2 }}
+      >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Typography
             variant="h6"
@@ -148,7 +148,13 @@ export default function Header({ darkMode, onToggleDarkMode }: AppHeaderProps) {
             VaKtions
           </Typography>
         </Box>
-        <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1, alignItems: 'center' }}>
+        <Box
+          sx={{
+            display: { xs: 'none', md: 'flex' },
+            gap: 1,
+            alignItems: 'center',
+          }}
+        >
           {navItems.map((item) => (
             <Button
               key={item.path}
@@ -160,12 +166,8 @@ export default function Header({ darkMode, onToggleDarkMode }: AppHeaderProps) {
                 borderRadius: 999,
                 px: 2,
                 color: isActive(item.path)
-                  ? darkMode
-                    ? '#e5e7eb'
-                    : '#0f172a'
-                  : darkMode
-                  ? '#cbd5f5'
-                  : '#4b5563',
+                  ? theme.textMain
+                  : theme.textSecondary,
                 backgroundColor: isActive(item.path)
                   ? darkMode
                     ? 'rgba(129,140,248,0.25)'
@@ -177,14 +179,14 @@ export default function Header({ darkMode, onToggleDarkMode }: AppHeaderProps) {
             </Button>
           ))}
           <Box sx={{ display: 'flex', alignItems: 'center', ml: 2 }}>
-            <IconButton size="small" onClick={onToggleDarkMode}>
-              {darkMode ? <DarkMode fontSize="small" /> : <LightMode fontSize="small" />}
+            <IconButton size="small" onClick={toggleTheme}>
+              {darkMode ? (
+                <DarkMode fontSize="small" />
+              ) : (
+                <LightMode fontSize="small" />
+              )}
             </IconButton>
-            <Switch
-              checked={darkMode}
-              onChange={onToggleDarkMode}
-              size="small"
-            />
+            <Switch checked={darkMode} onChange={toggleTheme} size="small" />
           </Box>
         </Box>
 
@@ -200,11 +202,14 @@ export default function Header({ darkMode, onToggleDarkMode }: AppHeaderProps) {
               keepMounted
             >
               {navItems.map((item) => (
-                <MenuItem key={item.path} onClick={() => handleNavigate(item.path)}>
+                <MenuItem
+                  key={item.path}
+                  onClick={() => handleNavigate(item.path)}
+                >
                   {item.label}
                 </MenuItem>
               ))}
-              <MenuItem onClick={onToggleDarkMode}>
+              <MenuItem onClick={toggleTheme}>
                 {darkMode ? 'Modo claro' : 'Modo escuro'}
               </MenuItem>
             </Menu>
@@ -234,7 +239,9 @@ export default function Header({ darkMode, onToggleDarkMode }: AppHeaderProps) {
           >
             <MenuItem disabled>
               <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                <Typography variant="body2">{user?.name || 'Usuário'}</Typography>
+                <Typography variant="body2">
+                  {user?.name || 'Usuário'}
+                </Typography>
                 <Typography variant="caption" color="text.secondary">
                   {user?.email}
                 </Typography>
