@@ -9,10 +9,14 @@ import {
   Stack,
 } from '@mui/material';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
+
 import Header from '../components/Header';
 import ErrorModal from '../components/ErrorModal';
 import RejectModal from '../components/RejectModal';
+
 import { approveVacation, rejectVacation } from '../services/vacations';
+import { useTheme } from '../context/ThemeContext';
+import { colors } from '../theme/colors';
 
 type VacationStatus = 'pending' | 'approved' | 'rejected' | 'completed';
 
@@ -52,17 +56,9 @@ export default function VacationDetails() {
   const [errorModal, setErrorModal] = useState<string | null>(null);
   const [rejectOpen, setRejectOpen] = useState(false);
 
-  const [darkMode, setDarkMode] = useState<boolean>(() => {
-    return localStorage.getItem('theme') === 'dark';
-  });
-
-  const handleToggleDarkMode = () => {
-    setDarkMode((prev) => {
-      const next = !prev;
-      localStorage.setItem('theme', next ? 'dark' : 'light');
-      return next;
-    });
-  };
+  // 🌙 Tema centralizado
+  const { darkMode } = useTheme();
+  const theme = darkMode ? colors.dark : colors.light;
 
   const statusColor = (status: VacationStatus) => {
     switch (status) {
@@ -77,12 +73,6 @@ export default function VacationDetails() {
     }
   };
 
-  const bgColor = darkMode ? '#020617' : '#f3f4f6';
-  const cardBg = darkMode ? '#0b1120' : '#ffffff';
-  const titleColor = darkMode ? '#e5e7eb' : '#0f172a';
-  const textColor = darkMode ? '#cbd5f5' : '#4b5563';
-  const borderColor = darkMode ? 'rgba(148,163,184,0.2)' : '#e5e7eb';
-
   const handleApprove = async () => {
     if (!vacation) return;
 
@@ -95,15 +85,6 @@ export default function VacationDetails() {
     } finally {
       setSubmitting(false);
     }
-  };
-
-  const handleOpenReject = () => {
-    if (!vacation) return;
-    setRejectOpen(true);
-  };
-
-  const handleCloseReject = () => {
-    setRejectOpen(false);
   };
 
   const handleConfirmReject = async (notes: string) => {
@@ -121,17 +102,14 @@ export default function VacationDetails() {
     }
   };
 
-  const handleBack = () => {
-    navigate(-1);
-  };
-
   const showNotFound = !vacation;
 
   return (
-    <Box sx={{ minHeight: '100vh', backgroundColor: bgColor }}>
-      <Header darkMode={darkMode} onToggleDarkMode={handleToggleDarkMode} />
+    <Box sx={{ minHeight: '100vh', backgroundColor: theme.bg }}>
+      <Header />
 
       <Box sx={{ p: 4, maxWidth: 900, mx: 'auto' }}>
+        {/* Header da página */}
         <Box
           sx={{
             display: 'flex',
@@ -145,45 +123,43 @@ export default function VacationDetails() {
             <Typography
               variant="h5"
               fontWeight={600}
-              sx={{ color: titleColor }}
+              sx={{ color: theme.textMain }}
             >
               Detalhes da solicitação
             </Typography>
-            {vacation && (
-              <Typography variant="body2" sx={{ color: textColor, mt: 0.5 }}>
-                Solicitação #{vacation.id}
-              </Typography>
-            )}
-            {!vacation && id && (
-              <Typography variant="body2" sx={{ color: textColor, mt: 0.5 }}>
-                Solicitação #{id}
-              </Typography>
-            )}
+
+            <Typography
+              variant="body2"
+              sx={{ color: theme.textSecondary, mt: 0.5 }}
+            >
+              Solicitação #{vacation?.id ?? id}
+            </Typography>
           </Box>
 
-          <Button variant="outlined" onClick={handleBack}>
+          <Button variant="outlined" onClick={() => navigate(-1)}>
             Voltar
           </Button>
         </Box>
 
-        {!vacation && (
-          <Box sx={{ mt: 4 }}>
-            <Typography sx={{ color: textColor }}>
-              Solicitação não encontrada. Volte para a lista e tente novamente.
-            </Typography>
-          </Box>
+        {/* Not found */}
+        {showNotFound && (
+          <Typography sx={{ color: theme.textSecondary }}>
+            Solicitação não encontrada. Volte para a lista e tente novamente.
+          </Typography>
         )}
 
+        {/* Conteúdo */}
         {vacation && (
           <Paper
             sx={{
-              backgroundColor: cardBg,
+              backgroundColor: theme.cardBg,
               borderRadius: 3,
-              border: `1px solid ${borderColor}`,
+              border: `1px solid ${theme.border}`,
               p: 3,
             }}
           >
             <Stack spacing={2}>
+              {/* Usuário + Status */}
               <Box
                 sx={{
                   display: 'flex',
@@ -193,16 +169,19 @@ export default function VacationDetails() {
                 }}
               >
                 <Box>
-                  <Typography variant="subtitle2" sx={{ color: textColor }}>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{ color: theme.textSecondary }}
+                  >
                     Colaborador
                   </Typography>
-                  <Typography variant="body1" sx={{ color: titleColor }}>
+                  <Typography sx={{ color: theme.textMain }}>
                     {vacation.user?.name ?? `Usuário #${vacation.userId}`}
                   </Typography>
                   {vacation.user?.email && (
                     <Typography
                       variant="body2"
-                      sx={{ color: textColor, mt: 0.5 }}
+                      sx={{ color: theme.textSecondary, mt: 0.5 }}
                     >
                       {vacation.user.email}
                     </Typography>
@@ -210,7 +189,10 @@ export default function VacationDetails() {
                 </Box>
 
                 <Box sx={{ textAlign: { xs: 'left', md: 'right' } }}>
-                  <Typography variant="subtitle2" sx={{ color: textColor }}>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{ color: theme.textSecondary }}
+                  >
                     Status
                   </Typography>
                   <Chip
@@ -224,6 +206,7 @@ export default function VacationDetails() {
 
               <Divider />
 
+              {/* Infos principais */}
               <Box
                 sx={{
                   display: 'grid',
@@ -232,28 +215,37 @@ export default function VacationDetails() {
                 }}
               >
                 <Box>
-                  <Typography variant="subtitle2" sx={{ color: textColor }}>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{ color: theme.textSecondary }}
+                  >
                     Período
                   </Typography>
-                  <Typography variant="body1" sx={{ color: titleColor }}>
+                  <Typography sx={{ color: theme.textMain }}>
                     {vacation.startDate} — {vacation.endDate}
                   </Typography>
                 </Box>
 
                 <Box>
-                  <Typography variant="subtitle2" sx={{ color: textColor }}>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{ color: theme.textSecondary }}
+                  >
                     Total de dias
                   </Typography>
-                  <Typography variant="body1" sx={{ color: titleColor }}>
+                  <Typography sx={{ color: theme.textMain }}>
                     {vacation.totalDays}
                   </Typography>
                 </Box>
 
                 <Box>
-                  <Typography variant="subtitle2" sx={{ color: textColor }}>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{ color: theme.textSecondary }}
+                  >
                     Dias disponíveis
                   </Typography>
-                  <Typography variant="body1" sx={{ color: titleColor }}>
+                  <Typography sx={{ color: theme.textMain }}>
                     {vacation.user?.availableVacationDays ?? '—'}
                   </Typography>
                 </Box>
@@ -261,6 +253,7 @@ export default function VacationDetails() {
 
               <Divider />
 
+              {/* Datas */}
               <Box
                 sx={{
                   display: 'grid',
@@ -269,50 +262,61 @@ export default function VacationDetails() {
                 }}
               >
                 <Box>
-                  <Typography variant="subtitle2" sx={{ color: textColor }}>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{ color: theme.textSecondary }}
+                  >
                     Solicitado em
                   </Typography>
-                  <Typography variant="body2" sx={{ color: titleColor }}>
+                  <Typography sx={{ color: theme.textMain }}>
                     {vacation.requestedAt}
                   </Typography>
                 </Box>
 
                 <Box>
-                  <Typography variant="subtitle2" sx={{ color: textColor }}>
+                  <Typography
+                    variant="subtitle2"
+                    sx={{ color: theme.textSecondary }}
+                  >
                     Última decisão
                   </Typography>
-                  <Typography variant="body2" sx={{ color: titleColor }}>
+                  <Typography sx={{ color: theme.textMain }}>
                     {vacation.approvedAt ?? '—'}
                   </Typography>
                 </Box>
               </Box>
 
+              <Divider />
+
+              {/* Observações */}
               <Box>
-                <Typography variant="subtitle2" sx={{ color: textColor }}>
+                <Typography
+                  variant="subtitle2"
+                  sx={{ color: theme.textSecondary }}
+                >
                   Observações
                 </Typography>
-                <Typography variant="body2" sx={{ color: titleColor, mt: 0.5 }}>
-                  {vacation.notes && vacation.notes.trim() !== ''
-                    ? vacation.notes
-                    : 'Nenhuma observação registrada.'}
+                <Typography sx={{ color: theme.textMain, mt: 0.5 }}>
+                  {vacation.notes?.trim() || 'Nenhuma observação registrada.'}
                 </Typography>
               </Box>
 
               <Divider />
 
+              {/* Ações */}
               <Box
                 sx={{
                   display: 'flex',
-                  flexWrap: 'wrap',
                   gap: 1.5,
                   justifyContent: 'flex-end',
+                  flexWrap: 'wrap',
                 }}
               >
                 <Button
                   variant="outlined"
                   size="small"
-                  disabled={submitting || showNotFound}
-                  onClick={handleOpenReject}
+                  disabled={submitting}
+                  onClick={() => setRejectOpen(true)}
                 >
                   Rejeitar
                 </Button>
@@ -320,7 +324,7 @@ export default function VacationDetails() {
                 <Button
                   variant="contained"
                   size="small"
-                  disabled={submitting || showNotFound}
+                  disabled={submitting}
                   onClick={handleApprove}
                 >
                   Aprovar
@@ -333,7 +337,7 @@ export default function VacationDetails() {
 
       <RejectModal
         open={rejectOpen}
-        onClose={handleCloseReject}
+        onClose={() => setRejectOpen(false)}
         onConfirm={handleConfirmReject}
         loading={submitting}
         vacation={vacation || undefined}

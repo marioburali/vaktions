@@ -161,7 +161,6 @@ export default function MyRequests() {
                 {vacations.map((vac: any) => (
                   <TableRow
                     key={vac.id}
-                    hover
                     sx={{
                       '&:hover': {
                         backgroundColor: theme.rowHover,

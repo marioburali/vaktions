@@ -260,7 +260,6 @@ export default function ManageUsers() {
                 {users.map((user) => (
                   <TableRow
                     key={user.id}
-                    hover
                     sx={{
                       '&:hover': {
                         backgroundColor: theme.rowHover,
