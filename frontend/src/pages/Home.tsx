@@ -1,10 +1,9 @@
-import { useEffect, useState } from 'react';
 import { Box, Typography, Paper } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
-import type { User } from '../types';
 import { useTheme } from '../context/ThemeContext';
 import { colors } from '../theme/colors';
+import { useAuthUser } from '../hooks/useAuthUser';
 
 type CardConfig = {
   key: string;
@@ -45,24 +44,9 @@ const cards: CardConfig[] = [
 
 export default function Home() {
   const navigate = useNavigate();
-  const [user, setUser] = useState<User | null>(null);
-
   const { darkMode } = useTheme();
   const theme = darkMode ? colors.dark : colors.light;
-
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem('user');
-      if (stored) {
-        setUser(JSON.parse(stored));
-      }
-    } catch {
-      setUser(null);
-    }
-  }, []);
-
-  const isAdmin = user?.role === 'admin';
-
+  const { user, isAdmin } = useAuthUser();
   const visibleCards = cards.filter((card) =>
     card.onlyAdmin ? isAdmin : true
   );
@@ -72,7 +56,11 @@ export default function Home() {
       <Header />
 
       <Box sx={{ px: { xs: 2, md: 4 }, py: 4 }}>
-        <Typography variant="h5" fontWeight={600} sx={{ color: theme.textMain }}>
+        <Typography
+          variant="h5"
+          fontWeight={600}
+          sx={{ color: theme.textMain }}
+        >
           Olá, {user?.name || 'colaborador(a)'}!
         </Typography>
 
@@ -104,7 +92,11 @@ export default function Home() {
                 },
               }}
             >
-              <Typography variant="h6" sx={{ color: theme.textMain }} fontWeight={600}>
+              <Typography
+                variant="h6"
+                sx={{ color: theme.textMain }}
+                fontWeight={600}
+              >
                 {card.title}
               </Typography>
               <Typography variant="body2" sx={{ color: theme.textSecondary }}>

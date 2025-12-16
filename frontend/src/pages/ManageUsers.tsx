@@ -34,29 +34,6 @@ import type { User, UserFormData, UserFormMode } from '../types';
 import { colors } from '../theme/colors';
 import { useTheme } from '../context/ThemeContext';
 
-// type Role = 'admin' | 'user';
-
-// export type User = {
-//   id: number;
-//   name: string;
-//   email: string;
-//   role: Role;
-//   occupation: string;
-//   hiredAt: string | null;
-//   availableVacationDays: number;
-// };
-
-// type UserFormData = {
-//   name: string;
-//   email: string;
-//   role: Role;
-//   occupation: string;
-//   hiredAt: string;
-//   password?: string;
-// };
-
-// type UserFormMode = 'create' | 'edit';
-
 export default function ManageUsers() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
