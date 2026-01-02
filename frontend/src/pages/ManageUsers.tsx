@@ -63,8 +63,9 @@ export default function ManageUsers() {
       setErrorModalMessage('');
       const data = await getAllUsers();
       setUsers(data);
-    } catch (err: any) {
-      setErrorModalMessage(err.message || 'Erro ao carregar usuários');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Erro ao carregar usuários';
+      setErrorModalMessage(message || 'Erro ao carregar usuários');
       setErrorModalOpen(true);
     } finally {
       setLoading(false);
@@ -106,7 +107,14 @@ export default function ManageUsers() {
       return;
     }
 
-    const payload: any = {
+    const payload: {
+      name: string;
+      email: string;
+      role: string;
+      occupation: string;
+      hiredAt: string;
+      password?: string;
+    } = {
       name: formData.name.trim(),
       email: formData.email.trim(),
       role: formData.role,
@@ -129,8 +137,9 @@ export default function ManageUsers() {
 
       await loadData();
       setUserModalOpen(false);
-    } catch (err: any) {
-      setErrorModalMessage(err.message || 'Erro ao salvar usuário');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Erro ao salvar usuário';
+      setErrorModalMessage(message || 'Erro ao salvar usuário');
       setErrorModalOpen(true);
     } finally {
       setUserModalSubmitting(false);
@@ -156,8 +165,9 @@ export default function ManageUsers() {
       await deleteUser(userToDelete.id);
       await loadData();
       handleCloseDelete();
-    } catch (err: any) {
-      setErrorModalMessage(err.message || 'Erro ao excluir usuário');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Erro ao excluir usuário';
+      setErrorModalMessage(message || 'Erro ao excluir usuário');
       setErrorModalOpen(true);
     } finally {
       setDeleteSubmitting(false);
