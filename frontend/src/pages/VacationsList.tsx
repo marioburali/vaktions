@@ -26,20 +26,19 @@ import ErrorModal from '../components/ErrorModal';
 
 import { useTheme } from '../context/ThemeContext';
 import { colors } from '../theme/colors';
+import { useModal } from '../hooks/useModal';
+import type { Vacation } from '../types';
 
 export default function VacationList() {
-  const [vacations, setVacations] = useState<any[]>([]);
+  const [vacations, setVacations] = useState<Vacation[]>([]);
   const [loading, setLoading] = useState(true);
-
-  const [rejectOpen, setRejectOpen] = useState(false);
-  const [vacationToReject, setVacationToReject] = useState<any | null>(null);
+  const [vacationToReject, setVacationToReject] = useState<Vacation | null>(null);
   const [submittingId, setSubmittingId] = useState<number | null>(null);
 
   const [errorModal, setErrorModal] = useState<string | null>(null);
 
   const navigate = useNavigate();
-
-  // 🌙 Tema centralizado
+  const modal = useModal<Vacation>();
   const { darkMode } = useTheme();
   const theme = darkMode ? colors.dark : colors.light;
 
@@ -52,8 +51,10 @@ export default function VacationList() {
       setLoading(true);
       const data = await getAllVacations();
       setVacations(data);
-    } catch (err: any) {
-      setErrorModal(err.message || 'Erro ao carregar solicitações');
+      console.log(data);
+    } catch (err: Error | unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Erro ao carregar solicitações';
+      setErrorModal(errorMessage || 'Erro ao carregar solicitações');
     } finally {
       setLoading(false);
     }
@@ -72,26 +73,17 @@ export default function VacationList() {
     }
   };
 
-  const handleApprove = async (vac: any) => {
+  const handleApprove = async (vac: Vacation) => {
     try {
       setSubmittingId(vac.id);
       await approveVacation(vac.id);
       await loadData();
-    } catch (err: any) {
-      setErrorModal(err.message || 'Erro ao aprovar solicitação');
+    } catch (err: Error | unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Erro ao aprovar solicitação';
+      setErrorModal(errorMessage || 'Erro ao aprovar solicitação');
     } finally {
       setSubmittingId(null);
     }
-  };
-
-  const openRejectModal = (vac: any) => {
-    setVacationToReject(vac);
-    setRejectOpen(true);
-  };
-
-  const closeRejectModal = () => {
-    setRejectOpen(false);
-    setVacationToReject(null);
   };
 
   const handleConfirmReject = async (notes: string) => {
@@ -101,9 +93,10 @@ export default function VacationList() {
       setSubmittingId(vacationToReject.id);
       await rejectVacation(vacationToReject.id, notes.trim());
       await loadData();
-      closeRejectModal();
-    } catch (err: any) {
-      setErrorModal(err.message || 'Erro ao rejeitar solicitação');
+      modal.closeModal()
+    } catch (err: Error | unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Erro ao rejeitar solicitação';
+      setErrorModal(errorMessage || 'Erro ao rejeitar solicitação');
     } finally {
       setSubmittingId(null);
     }
@@ -169,7 +162,7 @@ export default function VacationList() {
               </TableHead>
 
               <TableBody>
-                {vacations.map((vac: any) => {
+                {vacations.map((vac: Vacation) => {
                   const isSubmitting = submittingId === vac.id;
 
                   return (
@@ -243,7 +236,7 @@ export default function VacationList() {
                             borderColor: theme.border,
                             color: theme.textSecondary,
                           }}
-                          onClick={() => openRejectModal(vac)}
+                          onClick={() => modal.openModal(vac)}
                         >
                           Rejeitar
                         </Button>
@@ -258,8 +251,8 @@ export default function VacationList() {
       </Box>
 
       <RejectModal
-        open={rejectOpen}
-        onClose={closeRejectModal}
+        open={modal.open}
+        onClose={modal.closeModal}
         onConfirm={handleConfirmReject}
         loading={submittingId !== null}
         vacation={vacationToReject}

@@ -10,4 +10,5 @@ export interface Vacation {
   updatedAt: string;
   createdAt?: string;
   userId?: number;
+  userName?: string;
 }
