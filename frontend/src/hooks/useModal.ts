@@ -1,20 +1,20 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 
 export function useModal<T = undefined>() {
   const [open, setOpen] = useState(false);
   const [data, setData] = useState<T | null>(null);
 
-  const openModal = (payload?: T) => {
+  const openModal = useCallback((payload?: T) => {
     if (payload !== undefined) {
       setData(payload);
     }
     setOpen(true);
-  };
+  }, []);
 
-  const closeModal = () => {
+  const closeModal = useCallback(() => {
     setOpen(false);
     setData(null);
-  };
+  }, []);
 
   return {
     open,

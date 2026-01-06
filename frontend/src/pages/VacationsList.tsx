@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   Box,
   Typography,
@@ -27,40 +27,49 @@ import ErrorModal from '../components/ErrorModal';
 import { useTheme } from '../context/ThemeContext';
 import { colors } from '../theme/colors';
 import { useModal } from '../hooks/useModal';
-import type { Vacation } from '../types';
+import type { Vacation, VacationStatus } from '../types';
+
+type ChipColor =
+  | 'default'
+  | 'primary'
+  | 'secondary'
+  | 'error'
+  | 'info'
+  | 'success'
+  | 'warning';
 
 export default function VacationList() {
   const [vacations, setVacations] = useState<Vacation[]>([]);
   const [loading, setLoading] = useState(true);
-  const [vacationToReject, setVacationToReject] = useState<Vacation | null>(null);
   const [submittingId, setSubmittingId] = useState<number | null>(null);
 
-  const [errorModal, setErrorModal] = useState<string | null>(null);
-
   const navigate = useNavigate();
-  const modal = useModal<Vacation>();
+  const rejectModal = useModal<Vacation>();
+  const errorModal = useModal<string>();
+  const { openModal: openErrorModal } = errorModal;
+
   const { darkMode } = useTheme();
   const theme = darkMode ? colors.dark : colors.light;
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  async function loadData() {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
       const data = await getAllVacations();
       setVacations(data);
-      console.log(data);
-    } catch (err: Error | unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Erro ao carregar solicitações';
-      setErrorModal(errorMessage || 'Erro ao carregar solicitações');
+    } catch (err: unknown) {
+      const msg =
+        err instanceof Error ? err.message : 'Erro ao carregar solicitações';
+      openErrorModal(msg);
     } finally {
       setLoading(false);
     }
-  }
+  }, [openErrorModal]);
 
-  const statusColor = (status: string) => {
+  useEffect(() => {
+    void loadData();
+  }, [loadData]);
+
+  const statusColor = (status: VacationStatus): ChipColor => {
     switch (status) {
       case 'pending':
         return 'warning';
@@ -78,25 +87,28 @@ export default function VacationList() {
       setSubmittingId(vac.id);
       await approveVacation(vac.id);
       await loadData();
-    } catch (err: Error | unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Erro ao aprovar solicitação';
-      setErrorModal(errorMessage || 'Erro ao aprovar solicitação');
+    } catch (err: unknown) {
+      const msg =
+        err instanceof Error ? err.message : 'Erro ao aprovar solicitação';
+      openErrorModal(msg);
     } finally {
       setSubmittingId(null);
     }
   };
 
   const handleConfirmReject = async (notes: string) => {
-    if (!vacationToReject) return;
+    const vac = rejectModal.data;
+    if (!vac) return;
 
     try {
-      setSubmittingId(vacationToReject.id);
-      await rejectVacation(vacationToReject.id, notes.trim());
+      setSubmittingId(vac.id);
+      await rejectVacation(vac.id, notes.trim());
       await loadData();
-      modal.closeModal()
-    } catch (err: Error | unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Erro ao rejeitar solicitação';
-      setErrorModal(errorMessage || 'Erro ao rejeitar solicitação');
+      rejectModal.closeModal();
+    } catch (err: unknown) {
+      const msg =
+        err instanceof Error ? err.message : 'Erro ao rejeitar solicitação';
+      openErrorModal(msg);
     } finally {
       setSubmittingId(null);
     }
@@ -162,14 +174,16 @@ export default function VacationList() {
               </TableHead>
 
               <TableBody>
-                {vacations.map((vac: Vacation) => {
+                {vacations.map((vac) => {
                   const isSubmitting = submittingId === vac.id;
 
                   return (
                     <TableRow
                       key={vac.id}
+                      hover
                       sx={{
-                        '&:hover': {
+                        // ✅ hover funcionando mesmo com TableCell
+                        '&:hover td, &:hover th': {
                           backgroundColor: theme.rowHover,
                         },
                       }}
@@ -236,7 +250,7 @@ export default function VacationList() {
                             borderColor: theme.border,
                             color: theme.textSecondary,
                           }}
-                          onClick={() => modal.openModal(vac)}
+                          onClick={() => rejectModal.openModal(vac)}
                         >
                           Rejeitar
                         </Button>
@@ -251,17 +265,28 @@ export default function VacationList() {
       </Box>
 
       <RejectModal
-        open={modal.open}
-        onClose={modal.closeModal}
+        open={rejectModal.open}
+        onClose={rejectModal.closeModal}
         onConfirm={handleConfirmReject}
         loading={submittingId !== null}
-        vacation={vacationToReject}
+        vacation={
+          rejectModal.data && rejectModal.data.userId
+            ? {
+                id: rejectModal.data.id,
+                userId: rejectModal.data.userId,
+                user: rejectModal.data.user ?? undefined,
+                startDate: rejectModal.data.startDate,
+                endDate: rejectModal.data.endDate,
+                notes: rejectModal.data.notes,
+              }
+            : undefined
+        }
       />
 
       <ErrorModal
-        open={!!errorModal}
-        message={errorModal || ''}
-        onClose={() => setErrorModal(null)}
+        open={errorModal.open}
+        message={errorModal.data ?? ''}
+        onClose={errorModal.closeModal}
       />
     </Box>
   );

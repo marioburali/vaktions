@@ -1,3 +1,5 @@
+import type { User } from "./user";
+
 export type VacationStatus = 'pending' | 'approved' | 'rejected';
 
 export interface Vacation {
@@ -10,5 +12,5 @@ export interface Vacation {
   updatedAt: string;
   createdAt?: string;
   userId?: number;
-  userName?: string;
+  user?: User | null;
 }
