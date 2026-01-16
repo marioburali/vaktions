@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { login } from '../services/auth';
 import { useNavigate } from 'react-router-dom';
+import { useNotificationContext } from '../context/NotificationContext';
 import {
   TextField,
   Button,
@@ -16,14 +17,13 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(true);
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+  const { showError, showSuccess } = useNotificationContext();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError('');
     setLoading(true);
 
     try {
@@ -32,9 +32,10 @@ export default function LoginPage() {
       localStorage.setItem('token', result.token);
       localStorage.setItem('user', JSON.stringify(result.user));
 
+      showSuccess('Login realizado com sucesso!');
       navigate('/home');
     } catch (err: any) {
-      setError(err.message || 'Erro ao fazer login');
+      showError(err.message || 'Erro ao fazer login', 'Falha no Login');
     } finally {
       setLoading(false);
     }
@@ -105,22 +106,6 @@ export default function LoginPage() {
             <Typography variant="body2" color="text.secondary" mb={3}>
               Acesse sua conta.
             </Typography>
-
-            {error && (
-              <Box
-                sx={{
-                  mb: 2,
-                  p: 1.5,
-                  borderRadius: 2,
-                  backgroundColor: '#fef2f2',
-                  border: '1px solid #fecaca',
-                }}
-              >
-                <Typography variant="body2" color="error">
-                  {error}
-                </Typography>
-              </Box>
-            )}
 
             <form onSubmit={handleSubmit} noValidate>
               <TextField

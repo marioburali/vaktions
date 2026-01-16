@@ -27,17 +27,19 @@ import {
 import { formatDate } from '../utils/formatDate';
 import CreateVacationModal from '../components/CreateVacationModal';
 import DeleteVacationModal from '../components/DeleteRequestVacationModal';
+import { useModal } from '../hooks/useModal';
+import type { Vacation } from '../types/vacation';
 
 import { useTheme } from '../context/ThemeContext';
 import { colors } from '../theme/colors';
 
 export default function MyRequests() {
-  const [vacations, setVacations] = useState<any[]>([]);
+  const [vacations, setVacations] = useState<Vacation[]>([]);
   const [loading, setLoading] = useState(true);
-  const [errorModal, setErrorModal] = useState<string | null>(null);
+  const errorModal = useModal<string>();
   const [createOpen, setCreateOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [selectedVacation, setSelectedVacation] = useState<any>(null);
+  const [selectedVacation, setSelectedVacation] = useState<Vacation | null>(null);
 
   // 🌙 Tema centralizado
   const { darkMode } = useTheme();
@@ -45,6 +47,7 @@ export default function MyRequests() {
 
   useEffect(() => {
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function loadData() {
@@ -52,8 +55,9 @@ export default function MyRequests() {
       setLoading(true);
       const data = await getVacationsByUser();
       setVacations(data);
-    } catch (err: any) {
-      setErrorModal(err.message || 'Erro ao carregar solicitações');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Erro ao carregar solicitações';
+      errorModal.openModal(message);
     } finally {
       setLoading(false);
     }
@@ -80,8 +84,9 @@ export default function MyRequests() {
       await deleteVacation(selectedVacation.id);
       setDeleteOpen(false);
       await loadData();
-    } catch (e: any) {
-      setErrorModal(e.message || 'Erro ao excluir solicitação');
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : 'Erro ao excluir solicitação';
+      errorModal.openModal(message);
     } finally {
       setLoading(false);
     }
@@ -158,7 +163,7 @@ export default function MyRequests() {
               </TableHead>
 
               <TableBody>
-                {vacations.map((vac: any) => (
+                {vacations.map((vac) => (
                   <TableRow
                     key={vac.id}
                     sx={{
@@ -243,8 +248,9 @@ export default function MyRequests() {
             await createVacation(startDate, endDate);
             setCreateOpen(false);
             await loadData();
-          } catch (e: any) {
-            setErrorModal(e.message || 'Ops! Erro ao solicitar férias');
+          } catch (e: unknown) {
+            const message = e instanceof Error ? e.message : 'Ops! Erro ao solicitar férias';
+            errorModal.openModal(message);
           } finally {
             setLoading(false);
           }
@@ -260,9 +266,9 @@ export default function MyRequests() {
       />
 
       <ErrorModal
-        open={!!errorModal}
-        message={errorModal || ''}
-        onClose={() => setErrorModal(null)}
+        open={errorModal.open}
+        message={errorModal.data ?? ''}
+        onClose={errorModal.closeModal}
       />
     </Box>
   );
