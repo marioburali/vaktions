@@ -1,14 +1,8 @@
 import { z } from 'zod';
 
 export const createVacationSchema = z.object({
-  startDate: z.coerce.date({
-    required_error: 'Data de início é obrigatória',
-    invalid_type_error: 'Data de início inválida'
-  }),
-  endDate: z.coerce.date({
-    required_error: 'Data de fim é obrigatória',
-    invalid_type_error: 'Data de fim inválida'
-  }),
+  startDate: z.coerce.date(),
+  endDate: z.coerce.date(),
   notes: z.string().max(500, 'Notas não podem ter mais de 500 caracteres').optional(),
 }).refine(
   (data) => data.startDate <= data.endDate,

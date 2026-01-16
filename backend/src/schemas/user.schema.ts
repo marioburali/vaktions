@@ -6,10 +6,7 @@ export const createUserSchema = z.object({
   password: z.string().min(6, 'Senha deve ter no mínimo 6 caracteres'),
   role: z.enum(['admin', 'user']).default('user'),
   occupation: z.string().min(2, 'Cargo deve ter no mínimo 2 caracteres'),
-  hiredAt: z.coerce.date({ 
-    required_error: 'Data de admissão é obrigatória',
-    invalid_type_error: 'Data de admissão inválida'
-  }),
+  hiredAt: z.coerce.date(),
   availableVacationDays: z.number().int().min(0).optional(),
 });
 
@@ -19,9 +16,7 @@ export const updateUserSchema = z.object({
   password: z.string().min(6, 'Senha deve ter no mínimo 6 caracteres').optional(),
   role: z.enum(['admin', 'user']).optional(),
   occupation: z.string().min(2, 'Cargo deve ter no mínimo 2 caracteres').optional(),
-  hiredAt: z.coerce.date({
-    invalid_type_error: 'Data de admissão inválida'
-  }).optional(),
+  hiredAt: z.coerce.date().optional(),
   availableVacationDays: z.number().int().min(0).optional(),
 });
 
