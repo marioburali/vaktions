@@ -13,6 +13,7 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import Header from '../components/Header';
 import ErrorModal from '../components/ErrorModal';
 import RejectModal from '../components/RejectModal';
+import { useModal } from '../hooks/useModal';
 
 import { approveVacation, rejectVacation } from '../services/vacations';
 import { useTheme } from '../context/ThemeContext';
@@ -53,7 +54,7 @@ export default function VacationDetails() {
     state?.vacation ?? null
   );
   const [submitting, setSubmitting] = useState(false);
-  const [errorModal, setErrorModal] = useState<string | null>(null);
+  const errorModal = useModal<string>();
   const [rejectOpen, setRejectOpen] = useState(false);
 
   // 🌙 Tema centralizado
@@ -81,7 +82,7 @@ export default function VacationDetails() {
       const updated = await approveVacation(vacation.id);
       setVacation(updated);
     } catch (err: any) {
-      setErrorModal(err.message || 'Erro ao aprovar solicitação');
+      errorModal.openModal(err.message || 'Erro ao aprovar solicitação');
     } finally {
       setSubmitting(false);
     }
@@ -96,7 +97,7 @@ export default function VacationDetails() {
       setVacation(updated);
       setRejectOpen(false);
     } catch (err: any) {
-      setErrorModal(err.message || 'Erro ao rejeitar solicitação');
+      errorModal.openModal(err.message || 'Erro ao rejeitar solicitação');
     } finally {
       setSubmitting(false);
     }
@@ -344,9 +345,9 @@ export default function VacationDetails() {
       />
 
       <ErrorModal
-        open={!!errorModal}
-        message={errorModal || ''}
-        onClose={() => setErrorModal(null)}
+        open={errorModal.open}
+        message={errorModal.data ?? ''}
+        onClose={errorModal.closeModal}
       />
     </Box>
   );
