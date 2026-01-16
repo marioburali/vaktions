@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import vacationController from '../controllers/vacation.controller';
 import { authMiddleware } from '../middlewares/auth.middleware';
+import { validate } from '../middlewares/validate.middleware';
+import { createVacationSchema, approveVacationSchema, rejectVacationSchema } from '../schemas/vacation.schema';
 
 const router = Router();
 
@@ -8,7 +10,7 @@ const router = Router();
 router.use(authMiddleware);
 
 // Usuário logado cria um pedido de férias
-router.post('/', (req, res) =>
+router.post('/', validate(createVacationSchema), (req, res) =>
   vacationController.createVacationRequest(req, res)
 );
 
@@ -19,12 +21,12 @@ router.get('/me', (req, res) => vacationController.getMyVacations(req, res));
 router.get('/', (req, res) => vacationController.getAllVacations(req, res));
 
 // Admin aprova um pedido
-router.patch('/:id/approve', (req, res) =>
+router.patch('/:id/approve', validate(approveVacationSchema), (req, res) =>
   vacationController.approveVacation(req, res)
 );
 
 // Admin rejeita um pedido
-router.patch('/:id/reject', (req, res) =>
+router.patch('/:id/reject', validate(rejectVacationSchema), (req, res) =>
   vacationController.rejectVacation(req, res)
 );
 

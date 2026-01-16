@@ -5,13 +5,8 @@ import { mapError } from '../utils/errorMapper';
 class AuthController {
   public async login(req: Request, res: Response): Promise<Response> {
     try {
+      // Validação já foi feita pelo middleware Zod
       const { email, password } = req.body;
-
-      if (!email || !password) {
-        return res.status(400).json({
-          message: 'Email and password are required',
-        });
-      }
 
       const result = await authService.login({ email, password });
 
