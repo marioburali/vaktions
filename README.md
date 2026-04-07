@@ -23,6 +23,16 @@ Novas features já estão planejadas para as próximas versões.
 - Relacionamento entre empresas, colaboradores e períodos de férias  
 - API REST para integração com frontend e sistemas externos  
 
+### Funcionalidades já disponíveis no sistema
+
+- Login com autenticação JWT
+- Controle de acesso por perfil (`admin` e `user`)
+- Solicitação de férias pelo colaborador
+- Aprovação/rejeição de solicitações por administradores
+- Visualização de histórico de solicitações
+- Gestão de usuários (cadastro, edição e exclusão)
+- Interface com tema claro/escuro e feedback por modais/notificações
+
 ---
 
 ## 🏗 Tecnologias Utilizadas
@@ -39,21 +49,63 @@ Novas features já estão planejadas para as próximas versões.
 - React  
 - Vite  
 - TypeScript  
+- Material UI  
 
 ---
 
-## 📁 Estrutura do Projeto (Backend)
+## 🧱 Arquitetura
 
-/src
-├── controllers/ # Controllers da API
-├── services/ # Regras de negócio
-├── models/ # Models Sequelize
-├── database/
-│ ├── connection.ts # Conexão com Postgres
-│ ├── migrations/ # Migrations do banco
-├── middlewares/
-├── utils/
-├── server.ts # Ponto de entrada do servidor
+### Backend
+
+Organizado por camadas para separar responsabilidades:
+
+- `routes/`: definição de endpoints e aplicação de middlewares
+- `controllers/`: entrada e saída HTTP
+- `services/`: regras de negócio
+- `schemas/`: validação de payload com Zod
+- `middlewares/`: autenticação/autorização e validação
+- `models/`: entidades Sequelize
+- `database/`: conexão e migrations
+
+### Frontend
+
+Estrutura orientada a domínio de interface:
+
+- `pages/`: telas principais
+- `components/`: componentes reutilizáveis
+- `services/`: consumo da API
+- `context/`: estado global (tema/notificações)
+- `hooks/`: hooks customizados
+- `types/`: contratos TypeScript
+
+---
+
+## 📁 Estrutura do Projeto
+
+```text
+backend/
+	src/
+		controllers/
+		services/
+		models/
+		routes/
+		middlewares/
+		schemas/
+		database/
+			connection.ts
+			migrations/
+		utils/
+		server.ts
+
+frontend/
+	src/
+		pages/
+		components/
+		services/
+		context/
+		hooks/
+		types/
+```
 
 
 ---
@@ -62,13 +114,17 @@ Novas features já estão planejadas para as próximas versões.
 
 Crie um arquivo `.env` na raiz do backend:
 
+```env
 PORT=3001
 
 DB_HOST=db
 DB_PORT=5432
-DB_USER=postgres
+DB_USERNAME=postgres
 DB_PASSWORD=postgres
 DB_NAME=vaktions_dev
+JWT_SECRET=defina-um-segredo-forte
+JWT_EXPIRES_IN=86400
+```
 
 
 > 💡 Durante o desenvolvimento com Docker, o `DB_HOST` deve ser **db**, que é o nome do serviço no docker-compose.
@@ -80,74 +136,124 @@ DB_NAME=vaktions_dev
 ### 1. Subir backend + banco de dados
 
 ```bash
+cd backend
 docker compose up -d
+```
 
 Isso irá:
 
-subir o Postgres
+- subir o Postgres
+- construir e executar o backend em container
+- expor a API em `http://localhost:3001`
 
-construir e executar o backend em container
+### 2. Parar containers
 
-expor a API em http://localhost:3001
-
-2. Parar containers
+```bash
 docker compose down
+```
 
-3. Ver logs
+### 3. Ver logs
+
+```bash
 docker compose logs -f backend
+```
+
+---
 
 ▶️ Rodando o Frontend
 
 No diretório do frontend:
 
+```bash
+cd frontend
 npm install
 npm run dev
+```
 
 
 O frontend rodará em:
 
-http://localhost:5173
+`http://localhost:5173`
 
 
 (A porta pode variar dependendo do Vite.)
 
+---
+
 🧪 Scripts Disponíveis (Backend)
+
+```bash
 npm run dev        # Inicia o servidor em modo desenvolvimento
 npm run build      # Compila TypeScript para a pasta dist
 npm start          # Executa o servidor a partir da pasta dist
+```
+
+🧪 Scripts Disponíveis (Frontend)
+
+```bash
+npm run dev        # Inicia frontend em desenvolvimento
+npm run build      # Build de produção
+npm run preview    # Preview local da build
+npm run lint       # Lint do projeto
+```
+
+---
 
 🧬 Migrations (Sequelize)
 
 Criar migration:
 
+```bash
 npx sequelize-cli migration:generate --name nome-da-migration
+```
 
 
 Rodar migrations:
 
+```bash
 npx sequelize-cli db:migrate
+```
 
 
 Desfazer última migration:
 
+```bash
 npx sequelize-cli db:migrate:undo
+```
+
+---
+
+## 📌 Regras de negócio de férias já implementadas
+
+- Mínimo de 12 meses de trabalho para solicitar férias
+- Mínimo de 5 dias por solicitação
+- Máximo de 3 períodos por ciclo anual
+- Máximo de 30 dias por ciclo
+- Pelo menos um período de 14 dias ou mais
+- Bloqueio de nova solicitação quando já existe solicitação pendente
 
 
 🔮 Roadmap (Futuras Features)
 
-Painel administrativo para empresas
+### Melhorias técnicas planejadas
 
-Regras avançadas de cálculo de férias
+- Testes automatizados (backend e frontend)
+- Pipeline CI (lint + build + testes)
+- Melhoria da estratégia de autenticação/sessão
+- Evolução de logs e observabilidade
+- Documentação de API (OpenAPI/Swagger)
 
-Relatórios de RH (PDF, Excel)
+### Novas features planejadas
 
-Controle de licenças e afastamentos
+- Painel administrativo para empresas
+- Regras avançadas de cálculo de férias
+- Relatórios de RH (PDF, Excel)
+- Controle de licenças e afastamentos
+- Permissões avançadas por cargo
+- Notificações por e-mail
+- Dashboard com indicadores do time
 
-Permissões avançadas por cargo
-
-Notificações por e-mail
-
-Dashboard com indicadores do time
+---
 
 
 🤝 Como Contribuir
@@ -156,7 +262,9 @@ Faça um fork
 
 Crie uma branch:
 
+```bash
 git checkout -b feature/minha-feature
+```
 
 
 Faça commits objetivos
