@@ -281,11 +281,3 @@ Vaktions — Desenvolvido para tornar a gestão de pessoas mais prática, modern
 
 
 ---
-
-Se quiser:
-- adicionar **badges** (Node, TS, Docker, React, Postgres)  
-- adicionar **screenshots do sistema**  
-- gerar uma **versão em inglês**  
-- criar um **logo em SVG**  
-
-é só pedir!
