@@ -1,4 +1,5 @@
 # VakTions — Sistema de Gestão de Férias e Colaboradores
+(Em Desenvolvimento)
 
 Vaktions é um sistema criado para facilitar o dia a dia do setor de Recursos Humanos.  
 Nosso objetivo é tornar a **gestão de férias e colaboradores mais simples, organizada e profissional**, eliminando planilhas manuais, cálculos confusos e processos repetitivos.
